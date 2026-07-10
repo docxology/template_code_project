@@ -6,7 +6,7 @@ This section provides a machine-verifiable reproducibility certificate for the c
 
 | Property                          | Value                 |
 | --------------------------------- | --------------------- |
-| Config hash (SHA-256, truncated)  | `16947a5b0d7990e2`     |
+| Config hash (SHA-256, truncated)  | `7182b437c586a680`     |
 | Paper version                     | 2.5.2    |
 | First author                      | Daniel Ari Friedman |
 | Keywords                          | optimization algorithms, gradient descent, convergence analysis, numerical methods, mathematical programming, reproducible research, infrastructure automation   |
@@ -19,10 +19,10 @@ The analysis pipeline produced the following artifacts, each validated by `infra
 
 | Category                           | Count                  |
 | ---------------------------------- | ---------------------- |
-| Publication-quality figures        | 8   |
+| Publication-quality figures        | 9   |
 | Structured data files (CSV/JSON)   | 5 |
-| Analysis reports                   | 9   |
-| **Total artifacts**                | **22** |
+| Analysis reports                   | 19   |
+| **Total artifacts**                | **33** |
 
 ## Numerical Validation Summary
 

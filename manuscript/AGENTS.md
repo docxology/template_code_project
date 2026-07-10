@@ -37,7 +37,7 @@ Numeric values that come from analysis outputs **must** use `{{VARIABLE_NAME}}` 
 2. `generate_variables()` reads experiment parameters via `src/experiment_config.py::load_experiment_config()` (same loader as analysis, figures, and dashboard)
 3. The script writes the full `{TOKEN: value}` mapping to `output/data/manuscript_variables.json`
 4. It calls `infrastructure.rendering.manuscript_injection.write_resolved_manuscript_tree()` which copies each `manuscript/*.md` template to `output/manuscript/*.md`, substituting every `{{TOKEN}}` with its resolved value
-5. `scripts/03_render_pdf.py` renders the **substituted** copies (from `output/manuscript/`), not the originals
+5. `scripts/pipeline/stage_03_render.py` renders the **substituted** copies (from `output/manuscript/`), not the originals
 
 **Adding a new token**:
 1. Add a key/value pair to the `variables` dict in `src/manuscript_variables.py::generate_variables()`
@@ -52,7 +52,7 @@ grep -r "{{" projects/templates/template_code_project/output/manuscript/ 2>/dev/
   || echo "All tokens resolved"
 ```
 
-See [`../docs/syntax_guide.md`](../docs/syntax_guide.md) for the complete token reference table (28 tokens).
+See [`../docs/syntax_guide.md`](../docs/syntax_guide.md) for an illustrative token reference table — it is a subset that may lag behind the code, per that file's own disclaimer. The authoritative source of truth is the return value of `src/manuscript_variables.py::generate_variables()`; the live cross-reference test `tests/test_manuscript_variables.py::test_all_manuscript_tokens_are_generated` is what actually gates completeness.
 
 ## Figure Protocol
 
@@ -97,7 +97,7 @@ Follow these steps in order whenever you change behavior and need to update the 
    ```
 6. **Render PDF** from the repository root:
    ```bash
-   uv run python scripts/03_render_pdf.py --project templates/template_code_project
+   uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
    ```
 7. **Verify figures and table appear** in the rendered PDF; check `output/tex/*.log` for LaTeX errors.
 
@@ -109,7 +109,7 @@ Follow these steps in order whenever you change behavior and need to update the 
 > **PDF Rendering** stage fails while per-section slides still render. Full
 > detail: [`../docs/rendering_pipeline.md`](../docs/rendering_pipeline.md#prerequisite-mermaid-diagrams-need-chrome-headless-shell).
 
-Final deliverables appear under `output/templates/template_code_project/` after `scripts/05_copy_outputs.py` runs (working files remain under `projects/templates/template_code_project/output/` during the run).
+Final deliverables appear under `output/templates/template_code_project/` after `scripts/pipeline/stage_05_copy.py` runs (working files remain under `projects/templates/template_code_project/output/` during the run).
 
 ## RASP Conventions
 

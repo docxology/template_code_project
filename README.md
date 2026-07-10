@@ -7,7 +7,7 @@ Research project demonstrating optimization algorithms with automated figure gen
 Use this template for **code-driven computational research**: algorithms in
 `src/`, numerical experiments with deterministic seeds, automated
 publication-quality figures, and a manuscript that reports the computed
-results. It is the flagship demonstration of the thin-orchestrator pattern
+results. It demonstrates the thin-orchestrator pattern
 (scripts coordinate; `src/` implements; tests enforce ≥90% coverage with no
 mocks). If your project is primarily prose review, layout, or book-length
 structure, see [`template_prose_project`](../template_prose_project/),
@@ -25,7 +25,7 @@ hand-edit between the markers; update the config and regenerate (see the legend)
 
 Concept DOI: [10.5281/zenodo.20417136](https://doi.org/10.5281/zenodo.20417136) | Version DOI: [10.5281/zenodo.20931934](https://zenodo.org/records/20931934) | Repository: —
 
-Publishing surface — 12 platforms, 9 published:
+Publishing surface — 20 platforms, 9 published:
 
 | Platform | Tier | Status | Reference | Credentials |
 | --- | --- | --- | --- | --- |
@@ -41,10 +41,18 @@ Publishing surface — 12 platforms, 9 published:
 | netlify | first-class | ✅ published | [https://6a4440a789b44ad53f3af09b--tranquil-kleicha-0c9203.netlify.app](https://6a4440a789b44ad53f3af09b--tranquil-kleicha-0c9203.netlify.app) | `NETLIFY_AUTH_TOKEN` |
 | huggingface_hub | first-class | ✅ published | [https://huggingface.co/datasets/ActiveInference/template_code_project](https://huggingface.co/datasets/ActiveInference/template_code_project) | `HUGGINGFACE_TOKEN`, `HF_TOKEN` |
 | osf | first-class | ✅ published | [https://osf.io/mcv8j/](https://osf.io/mcv8j/) | `OSF_TOKEN` |
+| amazon_kdp | documented | 🟡 planned | — | `AMAZON_KDP_EMAIL`, `AMAZON_KDP_PASSWORD` |
+| google_play_books | documented | 🟡 planned | — | `GOOGLE_PLAY_BOOKS_SERVICE_ACCOUNT_JSON` |
+| gumroad | documented | 🟡 planned | — | `GUMROAD_ACCESS_TOKEN` |
+| leanpub | documented | 🟡 planned | — | `LEANPUB_API_KEY` |
+| lulu | documented | 🟡 planned | — | `LULU_CLIENT_KEY`, `LULU_CLIENT_SECRET` |
+| draft2digital | documented | 🟡 planned | — | `DRAFT2DIGITAL_API_TOKEN` |
+| stripe | documented | 🟡 planned | — | `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` |
+| ingramspark | documented | 🟡 planned | — | `INGRAMSPARK_CLIENT_ID`, `INGRAMSPARK_CLIENT_SECRET` |
 
 _Keywords: optimization algorithms, gradient descent, convergence analysis, numerical methods, mathematical programming, reproducible research, infrastructure automation._
 
-_Status legend: ✅ published (durable identifier recorded in `config.yaml`) · ⚪ available (adapter implemented and locally verifiable) · 🟡 planned. This block is generated — edit `manuscript/config.yaml`, then regenerate with `uv run python -m infrastructure.publishing.status_report --project <path> --write`._
+_Status legend: ✅ published (durable identifier recorded in `config.yaml`) · 🔵 reserved (identifier reserved but not yet registered by final publication) · ⚪ available (adapter implemented and locally verifiable) · 🟡 planned. This block is generated — edit `manuscript/config.yaml`, then regenerate with `uv run python -m infrastructure.publishing.status_report --project <path> --write`._
 <!-- PUBLISHING-STATUS:END -->
 
 The 3 platforms still shown ⚪ available are not automatable to "published" with
@@ -65,8 +73,8 @@ git clone https://github.com/docxology/template
 cd template
 uv sync
 ./run.sh --project templates/template_code_project --pipeline --core-only
-uv run python scripts/04_validate_output.py --project templates/template_code_project
-uv run python scripts/05_copy_outputs.py --project templates/template_code_project
+uv run python scripts/pipeline/stage_04_validate.py --project templates/template_code_project
+uv run python scripts/pipeline/stage_05_copy.py --project templates/template_code_project
 ```
 
 Standalone repositories are publication mirrors for source, DOI metadata, and
@@ -82,7 +90,7 @@ uv run python projects/templates/template_code_project/scripts/optimization_anal
 # Run tests
 uv run pytest projects/templates/template_code_project/tests/ -v
 
-# View final deliverables (after scripts/05_copy_outputs.py)
+# View final deliverables (after scripts/pipeline/stage_05_copy.py)
 ls -la output/templates/template_code_project/
 ```
 
@@ -108,7 +116,7 @@ npx --yes puppeteer browsers install chrome-headless-shell
 
 Without it the **PDF Rendering** stage fails while slides still render — see
 [`docs/troubleshooting.md`](docs/troubleshooting.md#pdf-rendering-fails-mmdc-could-not-find-chrome).
-Full end-to-end: `uv run python scripts/execute_pipeline.py --project templates/template_code_project --core-only`.
+Full end-to-end: `uv run python scripts/runner/execute_pipeline.py --project templates/template_code_project --core-only`.
 
 ## Dependencies
 
@@ -242,4 +250,4 @@ See [AGENTS.md](AGENTS.md) for technical documentation.
 - Forward backlog: [`TODO.md`](TODO.md).
 - Copy-and-customize config: [`manuscript/config.yaml.example`](manuscript/config.yaml.example).
 - Project validation: `uv run pytest projects/templates/template_code_project/tests/ --cov=projects/templates/template_code_project/src --cov-fail-under=90`.
-- Repo drift validation: `uv run python scripts/check_template_drift.py --strict`.
+- Repo drift validation: `uv run python scripts/audit/check_template_drift.py --strict`.
