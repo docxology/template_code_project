@@ -179,6 +179,20 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
   fontURL: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/woff2",
   dynamicPrefix: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/dynamic"
 });
+window.normalizeTemplateMathJaxAria = function () {
+  document.querySelectorAll("mjx-speech[aria-roledescription]").forEach(function (node) {
+    var roleDescription = node.getAttribute("aria-roledescription") || "";
+    if (/[-]/.test(roleDescription)) {
+      node.setAttribute("aria-roledescription", "mathematical expression");
+    }
+  });
+};
+window.MathJax.startup = Object.assign({}, window.MathJax.startup, {
+  ready: function () {
+    window.MathJax.startup.defaultReady();
+    window.MathJax.startup.promise.then(window.normalizeTemplateMathJaxAria);
+  }
+});
 </script>
 <script defer=""
   src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-chtml.js"
@@ -187,7 +201,8 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
 <link data-template-favicon rel="icon" href="favicon.ico">
 </head>
 <body>
-<main id="main-content">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<main id="main-content" tabindex="-1">
 <h1 id="sec:results">Results</h1>
 <p>This section presents the experimental results from the gradient
 descent optimization study, including convergence analysis and
@@ -267,21 +282,21 @@ as the source of truth for [tbl:opt_results]. Rows follow
 rows below are injected at render time from that CSV
 (<code>RESULT_TABLE_ROWS</code> in
 <code>scripts/z_generate_manuscript_variables.py</code>).</p>
-<table id="tbl:opt_results">
+<table id="tbl:opt_results" style="width:100%;">
 <caption>Gradient descent outcomes per configured step size: state at
 termination, iteration count capped by <span
-class="math inline">\(N_{\max} = 1000\)</span>, and the
+class="math inline">\(N_{\max} = 1000\)</span>, the
 <code>converged</code> flag from <code>gradient_descent()</code> using
-<span class="math inline">\(\|\nabla f\| &lt; 10^{-8}\)</span>. Rows
-marked “No” either hit the iteration cap before meeting the gradient
-tolerance (small <span class="math inline">\(\alpha\)</span>) or
-correspond to unstable dynamics when <span
-class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
+<span class="math inline">\(\|\nabla f\| &lt; 10^{-8}\)</span>, and its
+structured termination reason. A <code>non_finite</code> row stops
+before an overflowing update is serialized and retains the last finite
+iterate.</caption>
 <colgroup>
-<col style="width: 21%" />
-<col style="width: 22%" />
-<col style="width: 23%" />
-<col style="width: 16%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 14%" />
+<col style="width: 13%" />
 <col style="width: 15%" />
 </colgroup>
 <thead>
@@ -291,6 +306,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <th>Objective Value</th>
 <th>Iterations</th>
 <th>Converged</th>
+<th>Termination</th>
 </tr>
 </thead>
 <tbody>
@@ -300,6 +316,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>1000</td>
 <td>No</td>
+<td>max_iterations</td>
 </tr>
 <tr>
 <td>0.10</td>
@@ -307,6 +324,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>175</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>0.50</td>
@@ -314,6 +332,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>27</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>1.00</td>
@@ -321,6 +340,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>1</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>1.50</td>
@@ -328,13 +348,15 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>27</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>2.50</td>
-<td>-123384059690617745524091335813180186890505789975305907992186675554099100089605560395688521301527760116788345515894979896207548805638009361768752272295676536457470613583575384064.0000</td>
-<td>inf</td>
-<td>1000</td>
+<td>-18027808360396904929014313133756094602021490593623455934143098782085898358268968910321926429082931340564236187769460640748166785144621899661251320903368704.0000</td>
+<td>162500937139598269661779749391931612290431672893591152510335296183621559147095059174363943753278426469403184325060604037672721111493697147195103358138591980698705733738747223639633375614563987655337958785982898164996799665358767974385539800466556596391365426397418791309924510722911320257856182821332197572608.0000</td>
+<td>876</td>
 <td>No</td>
+<td>non_finite</td>
 </tr>
 </tbody>
 </table>
@@ -508,39 +530,34 @@ computation</li>
 class="math inline">\(O(d)\)</span> for storing variables and
 gradients</li>
 <li><strong>Convergence</strong>: Fastest at <span
-class="math inline">\(\alpha = 1.0\)</span> (1 iteration), average 372
+class="math inline">\(\alpha = 1.0\)</span> (1 iteration), average 351
 iterations</li>
 <li><strong>Scalability</strong>: Memory-efficient implementation
 suitable for high-dimensional problems</li>
 </ul>
 <h3 id="performance-benchmarking">Performance Benchmarking</h3>
-<p>[fig:benchmark] shows how <code>gradient_descent()</code> scales with
-problem dimension by running the optimizer on identity-Hessian
-quadratics of dimension <span class="math inline">\(d \in \{1, 2, 5, 10,
-20, 50\}\)</span>.</p>
+<p>[fig:benchmark] shows deterministic computational work and
+convergence iterations for <code>gradient_descent()</code> on
+identity-Hessian quadratics of dimension <span class="math inline">\(d
+\in \{1, 2, 5, 10, 20, 50\}\)</span>.</p>
 <figure id="fig:benchmark">
 <img src="../figures/performance_benchmark.png"
-alt="Dimensional scaling from generate_benchmark_visualization() ." />
-<figcaption>Dimensional scaling from
+alt="Deterministic dimensional benchmark from generate_benchmark_visualization() ." />
+<figcaption>Deterministic dimensional benchmark from
 <code>generate_benchmark_visualization()</code>. Dimensions <span
 class="math inline">\(d \in \{1, 2, 5, 10, 20, 50\}\)</span> run on
 identity-Hessian quadratics with <span
 class="math inline">\(\alpha=0.1\)</span> and gradient tolerance <span
-class="math inline">\(10^{-10}\)</span> (both hardcoded in the script
-for benchmark stability). <strong>Left</strong>: mean wall-clock time
-per <code>gradient_descent()</code> call (μs). The flat regime at <span
-class="math inline">\(d \leq 20\)</span> reflects per-iteration overhead
-(Python dispatch, NumPy bookkeeping); the upturn at <span
-class="math inline">\(d=50\)</span> shows the <span
-class="math inline">\(O(d)\)</span> matrix-vector cost beginning to
-dominate. <strong>Right</strong>: iterations-to-convergence rises only
-modestly across two decades of <span class="math inline">\(d\)</span>
-(<span class="math inline">\(219 \to 238\)</span>). This near-invariance
-is expected: <span class="math inline">\(\kappa(I_d)=1\)</span>
-regardless of dimension, so the contraction factor <span
-class="math inline">\(\rho=|1-\alpha|=0.9\)</span> is identical for
-every <span class="math inline">\(d\)</span>, and only the
-per-coordinate residual norm grows mildly.</figcaption>
+class="math inline">\(10^{-10}\)</span>. <strong>Left</strong>: the
+implementation-independent work proxy <span class="math inline">\(d
+\times \text{iterations}\)</span>, proportional to scalar elements
+processed by the dense matrix-vector update. <strong>Right</strong>:
+exact iterations to convergence. Wall-clock microseconds are
+intentionally excluded because they vary with hardware and host load.
+The similar iteration counts are expected because <span
+class="math inline">\(\kappa(I_d)=1\)</span> and the contraction factor
+<span class="math inline">\(\rho=|1-\alpha|=0.9\)</span> is
+dimension-independent.</figcaption>
 </figure>
 <h3 id="numerical-stability-analysis">Numerical Stability Analysis</h3>
 <p>[fig:stability] maps the optimizer’s accuracy across a grid of 8
@@ -578,7 +595,7 @@ non-converged runs):</strong></p>
 <ul>
 <li>Smallest iteration count recorded: 1</li>
 <li>Largest iteration count recorded: 1000</li>
-<li>Mean iterations across rows in [tbl:opt_results]: 372</li>
+<li>Mean iterations across rows in [tbl:opt_results]: 351</li>
 </ul>
 <p><strong>Numerical Accuracy:</strong></p>
 <ul>

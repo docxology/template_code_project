@@ -5,6 +5,7 @@
   <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Daniel Ari Friedman" />
+  <meta name="description" content="Theoretical Bounds and Empirical Performance in Quadratic Minimization" />
   <title>Convergence Analysis of Gradient Descent Optimization</title>
   <style>
     /* Default styles provided by pandoc.
@@ -264,6 +265,20 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
   fontURL: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/woff2",
   dynamicPrefix: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/dynamic"
 });
+window.normalizeTemplateMathJaxAria = function () {
+  document.querySelectorAll("mjx-speech[aria-roledescription]").forEach(function (node) {
+    var roleDescription = node.getAttribute("aria-roledescription") || "";
+    if (/[-]/.test(roleDescription)) {
+      node.setAttribute("aria-roledescription", "mathematical expression");
+    }
+  });
+};
+window.MathJax.startup = Object.assign({}, window.MathJax.startup, {
+  ready: function () {
+    window.MathJax.startup.defaultReady();
+    window.MathJax.startup.promise.then(window.normalizeTemplateMathJaxAria);
+  }
+});
 </script>
 <script defer=""
   src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-chtml.js"
@@ -288,11 +303,6 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
     --web-border: #2a3447;
   }
 }
-/* Numbered theorem-like environments. Pandoc's HTML writer drops raw-LaTeX
-   \newtheorem blocks, so WebRenderer rewrites them (web-only) into
-   .theorem-box Divs; this styles them as boxed, numbered blocks that read like
-   the PDF's theorem environments. The PDF path is unchanged (it uses the LaTeX
-   preamble). */
 .theorem-box {
   border-left: 4px solid var(--brand-1);
   background: var(--web-surface);
@@ -323,11 +333,38 @@ body {
   overflow-x: visible;
 }
 
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  padding: 0.65rem 0.9rem;
+  transform: translateY(-120%);
+  background-color: #1a1a1a;
+  color: #ffffff;
+  font-family: sans-serif;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.skip-link:visited {
+  color: #ffffff;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 @media (max-width: 600px) {
   body {
     width: 100%;
     max-width: 100%;
     padding: 16px;
+  }
+
+  figure img {
+    width: 100% !important;
   }
 }
 
@@ -367,6 +404,11 @@ table {
   margin: 20px 0;
 }
 
+figure {
+  max-width: 100%;
+  margin: 1.5rem 0;
+}
+
 th, td {
   border: 1px solid #bdc3c7;
   padding: 8px;
@@ -374,7 +416,7 @@ th, td {
 }
 
 th {
-  background-color: #3498db;
+  background-color: #1f6f8b;
   color: white;
 }
 
@@ -391,7 +433,9 @@ img {
 
 a {
   color: #b91c1c;
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.14em;
   overflow-wrap: anywhere;
 }
 
@@ -400,7 +444,12 @@ a:visited {
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration-thickness: 0.14em;
+}
+
+a:focus-visible {
+  outline: 3px solid #1f6f8b;
+  outline-offset: 3px;
 }
 
 .toc {
@@ -410,8 +459,18 @@ a:hover {
   margin-bottom: 30px;
 }
 
-.toc a {
+.toc a,
+#TOC a {
   color: #b91c1c;
+  display: inline-block;
+  min-height: 28px;
+  line-height: 1.5;
+  padding-block: 2px;
+}
+
+.toc li,
+#TOC li {
+  margin-block: 1px;
 }
 
 .math {
@@ -451,7 +510,7 @@ mjx-container[display="true"] {
 </style>
 </head>
 <body>
-<main id="main-content">
+<a class="skip-link" href="#main-content">Skip to main content</a>
 <header id="title-block-header">
 <h1 class="title">Convergence Analysis of Gradient Descent
 Optimization</h1>
@@ -715,6 +774,7 @@ class="toc-section-number">8.4</span> Explicit limitations</a></li>
 class="toc-section-number">9</span> References</a></li>
 </ul>
 </nav>
+<main id="main-content" tabindex="-1">
 <p><strong>State:</strong> unpublished / pending pairing</p>
 <p><strong>Pairing:</strong> pending — unresolved: - ✗ GitHub release
 URL: <code>pending</code> - ✗ PDF SHA-256: <code>pending</code></p>
@@ -896,8 +956,9 @@ leverages the <code>infrastructure</code> layer:</p>
 <ul>
 <li><strong>Scientific Utilities</strong>: Utilizing
 <code>infrastructure.scientific.stability</code> and
-<code>infrastructure.scientific.benchmarking</code> to guarantee
-numerical boundaries and performance scaling.</li>
+<code>infrastructure.scientific.benchmarking</code> to check numerical
+boundaries and exercise runtime performance diagnostics without pinning
+host-dependent timings.</li>
 <li><strong>Hermetic Validation</strong>: Deploying
 <code>infrastructure.validation</code> components
 (<code>markdown_validator</code>, <code>output_validator</code>) to
@@ -1048,13 +1109,14 @@ orchestrator</a> execution deliberately aborts, ensuring the methodology
 cannot enter unrecoverable states.</p>
 <h3 data-number="3.2.2" id="performance-benchmarking"><span
 class="header-section-number">3.2.2</span> Performance Benchmarking</h3>
-<p>Computational complexity is evaluated not just theoretically, but
-empirically via <a
-href="https://github.com/docxology/template/blob/main/infrastructure/scientific/benchmarking.py"><code>infrastructure.scientific.benchmarking.benchmark_function</code></a>.
-This module captures high-resolution execution timings and memory
-footprints across dimensionality sweeps, guaranteeing that the <span
-class="math inline">\(O(n)\)</span> space-time complexity predictions
-hold true on the host architecture.</p>
+<p>The analysis exercises <a
+href="https://github.com/docxology/template/blob/main/infrastructure/scientific/benchmarking.py"><code>infrastructure.scientific.benchmarking.benchmark_function</code></a>
+as a runtime diagnostic. Host-dependent timing and memory observations
+are logged but excluded from tracked evidence. The canonical report
+records fixed inputs and exact objective values, while the dimensional
+figure reports deterministic convergence iterations and the proxy <span
+class="math inline">\(d \times \text{iterations}\)</span>; neither
+surface claims that one host run proves an asymptotic bound.</p>
 <h2 data-number="3.3" id="convergence-analysis"><span
 class="header-section-number">3.3</span> Convergence Analysis</h2>
 <p>For quadratic functions <span class="math inline">\(f(x) =
@@ -1139,11 +1201,14 @@ class="header-section-number">3.4.3</span> Stopping rule and
 reporting</h3>
 <p><code>gradient_descent()</code> terminates when <span
 class="math inline">\(\|\nabla f(x_k)\|\)</span> falls below
-<code>experiment.tolerance</code> or when <span
+<code>experiment.tolerance</code>, when <span
 class="math inline">\(k\)</span> reaches
-<code>experiment.max_iterations</code>. The boolean
-<code>converged</code> in exported CSV rows distinguishes these
-outcomes. Downstream,
+<code>experiment.max_iterations</code>, or when an objective, gradient,
+or update becomes non-finite. The boolean <code>converged</code> plus
+<code>termination_reason</code> in exported CSV rows distinguish these
+outcomes. A non-finite candidate is rejected before it enters
+<code>objective_history</code>, preserving the last finite state for
+reproducible reporting. Downstream,
 <code>scripts/z_generate_manuscript_variables.py</code> aggregates the
 CSV into <code>RESULT_*</code> placeholders so tables and prose cannot
 drift from the last analysis run.</p>
@@ -1273,21 +1338,21 @@ follow <code>experiment.step_sizes</code> in <code>config.yaml</code>;
 the body rows below are injected at render time from that CSV
 (<code>RESULT_TABLE_ROWS</code> in
 <code>scripts/z_generate_manuscript_variables.py</code>).</p>
-<table id="tbl:opt_results">
+<table id="tbl:opt_results" style="width:100%;">
 <caption>Table 1: Gradient descent outcomes per configured step size:
 state at termination, iteration count capped by <span
-class="math inline">\(N_{\max} = 1000\)</span>, and the
+class="math inline">\(N_{\max} = 1000\)</span>, the
 <code>converged</code> flag from <code>gradient_descent()</code> using
-<span class="math inline">\(\|\nabla f\| &lt; 10^{-8}\)</span>. Rows
-marked “No” either hit the iteration cap before meeting the gradient
-tolerance (small <span class="math inline">\(\alpha\)</span>) or
-correspond to unstable dynamics when <span
-class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
+<span class="math inline">\(\|\nabla f\| &lt; 10^{-8}\)</span>, and its
+structured termination reason. A <code>non_finite</code> row stops
+before an overflowing update is serialized and retains the last finite
+iterate.</caption>
 <colgroup>
-<col style="width: 21%" />
-<col style="width: 22%" />
-<col style="width: 23%" />
-<col style="width: 16%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 14%" />
+<col style="width: 13%" />
 <col style="width: 15%" />
 </colgroup>
 <thead>
@@ -1297,6 +1362,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <th>Objective Value</th>
 <th>Iterations</th>
 <th>Converged</th>
+<th>Termination</th>
 </tr>
 </thead>
 <tbody>
@@ -1306,6 +1372,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>1000</td>
 <td>No</td>
+<td>max_iterations</td>
 </tr>
 <tr>
 <td>0.10</td>
@@ -1313,6 +1380,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>175</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>0.50</td>
@@ -1320,6 +1388,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>27</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>1.00</td>
@@ -1327,6 +1396,7 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>1</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>1.50</td>
@@ -1334,13 +1404,15 @@ class="math inline">\(|1-\alpha| \geq 1\)</span>.</caption>
 <td>-0.5000</td>
 <td>27</td>
 <td>Yes</td>
+<td>converged</td>
 </tr>
 <tr>
 <td>2.50</td>
-<td>-123384059690617745524091335813180186890505789975305907992186675554099100089605560395688521301527760116788345515894979896207548805638009361768752272295676536457470613583575384064.0000</td>
-<td>inf</td>
-<td>1000</td>
+<td>-18027808360396904929014313133756094602021490593623455934143098782085898358268968910321926429082931340564236187769460640748166785144621899661251320903368704.0000</td>
+<td>162500937139598269661779749391931612290431672893591152510335296183621559147095059174363943753278426469403184325060604037672721111493697147195103358138591980698705733738747223639633375614563987655337958785982898164996799665358767974385539800466556596391365426397418791309924510722911320257856182821332197572608.0000</td>
+<td>876</td>
 <td>No</td>
+<td>non_finite</td>
 </tr>
 </tbody>
 </table>
@@ -1572,40 +1644,35 @@ computation</li>
 class="math inline">\(O(d)\)</span> for storing variables and
 gradients</li>
 <li><strong>Convergence</strong>: Fastest at <span
-class="math inline">\(\alpha = 1.0\)</span> (1 iteration), average 372
+class="math inline">\(\alpha = 1.0\)</span> (1 iteration), average 351
 iterations</li>
 <li><strong>Scalability</strong>: Memory-efficient implementation
 suitable for high-dimensional problems</li>
 </ul>
 <h3 data-number="4.6.2" id="performance-benchmarking-1"><span
 class="header-section-number">4.6.2</span> Performance Benchmarking</h3>
-<p>fig. <a href="#fig:benchmark">5</a> shows how
-<code>gradient_descent()</code> scales with problem dimension by running
-the optimizer on identity-Hessian quadratics of dimension <span
-class="math inline">\(d \in \{1, 2, 5, 10, 20, 50\}\)</span>.</p>
+<p>fig. <a href="#fig:benchmark">5</a> shows deterministic computational
+work and convergence iterations for <code>gradient_descent()</code> on
+identity-Hessian quadratics of dimension <span class="math inline">\(d
+\in \{1, 2, 5, 10, 20, 50\}\)</span>.</p>
 <figure id="fig:benchmark">
 <img src="../figures/performance_benchmark.png"
-alt="Figure 5: Dimensional scaling from generate_benchmark_visualization() ." />
-<figcaption>Figure 5: Dimensional scaling from
-<code>generate_benchmark_visualization()</code>. Dimensions <span
-class="math inline">\(d \in \{1, 2, 5, 10, 20, 50\}\)</span> run on
-identity-Hessian quadratics with <span
+alt="Figure 5: Deterministic dimensional benchmark from generate_benchmark_visualization() ." />
+<figcaption>Figure 5: Deterministic dimensional
+benchmark from <code>generate_benchmark_visualization()</code>.
+Dimensions <span class="math inline">\(d \in \{1, 2, 5, 10, 20,
+50\}\)</span> run on identity-Hessian quadratics with <span
 class="math inline">\(\alpha=0.1\)</span> and gradient tolerance <span
-class="math inline">\(10^{-10}\)</span> (both hardcoded in the script
-for benchmark stability). <strong>Left</strong>: mean wall-clock time
-per <code>gradient_descent()</code> call (μs). The flat regime at <span
-class="math inline">\(d \leq 20\)</span> reflects per-iteration overhead
-(Python dispatch, NumPy bookkeeping); the upturn at <span
-class="math inline">\(d=50\)</span> shows the <span
-class="math inline">\(O(d)\)</span> matrix-vector cost beginning to
-dominate. <strong>Right</strong>: iterations-to-convergence rises only
-modestly across two decades of <span class="math inline">\(d\)</span>
-(<span class="math inline">\(219 \to 238\)</span>). This near-invariance
-is expected: <span class="math inline">\(\kappa(I_d)=1\)</span>
-regardless of dimension, so the contraction factor <span
-class="math inline">\(\rho=|1-\alpha|=0.9\)</span> is identical for
-every <span class="math inline">\(d\)</span>, and only the
-per-coordinate residual norm grows mildly.</figcaption>
+class="math inline">\(10^{-10}\)</span>. <strong>Left</strong>: the
+implementation-independent work proxy <span class="math inline">\(d
+\times \text{iterations}\)</span>, proportional to scalar elements
+processed by the dense matrix-vector update. <strong>Right</strong>:
+exact iterations to convergence. Wall-clock microseconds are
+intentionally excluded because they vary with hardware and host load.
+The similar iteration counts are expected because <span
+class="math inline">\(\kappa(I_d)=1\)</span> and the contraction factor
+<span class="math inline">\(\rho=|1-\alpha|=0.9\)</span> is
+dimension-independent.</figcaption>
 </figure>
 <h3 data-number="4.6.3" id="numerical-stability-analysis-1"><span
 class="header-section-number">4.6.3</span> Numerical Stability
@@ -1649,7 +1716,7 @@ non-converged runs):</strong></p>
 <li>Smallest iteration count recorded: 1</li>
 <li>Largest iteration count recorded: 1000</li>
 <li>Mean iterations across rows in tbl. <a
-href="#tbl:opt_results">1</a>: 372</li>
+href="#tbl:opt_results">1</a>: 351</li>
 </ul>
 <p><strong>Numerical Accuracy:</strong></p>
 <ul>
@@ -1876,16 +1943,18 @@ class="math inline">\(d \in \{1, 2, 5, 10, 20, 50\}\)</span>, from the
 scalar case (<span class="math inline">\(d = 1\)</span>) to moderate
 dimensionality (<span class="math inline">\(d = 50\)</span>), using
 identity-Hessian quadratics to isolate algorithmic scaling from problem
-conditioning effects. Representative single-call execution time from the
-last benchmark run: <strong>1.9 μs</strong> (recorded in
-<code>output/reports/performance_benchmark.json</code>).</p>
+conditioning effects. The tracked
+<code>output/reports/performance_benchmark.json</code> records fixed
+inputs, exact objective values, and validation checks. Wall-clock timing
+is retained only as a runtime diagnostic because host load and hardware
+make microsecond values unsuitable as pinned reproducibility claims.</p>
 <h2 data-number="6.5" id="computational-environment"><span
 class="header-section-number">6.5</span> Computational Environment</h2>
 <ul>
-<li><strong>Python</strong>: 3.12.13</li>
+<li><strong>Python</strong>: 3.13.11</li>
 <li><strong>NumPy</strong>: 2.4.2</li>
 <li><strong>Platform</strong>: Darwin arm64</li>
-<li><strong>Generated</strong>: 2026-07-10T14:33:59Z</li>
+<li><strong>Generated</strong>: 2026-07-20T15:59:12Z</li>
 </ul>
 <h2 data-number="6.6" id="pipeline-ordering"><span
 class="header-section-number">6.6</span> Pipeline ordering</h2>
@@ -1980,7 +2049,7 @@ class="header-section-number">7.1</span> Configuration Provenance</h2>
 <tbody>
 <tr>
 <td>Config hash (SHA-256, truncated)</td>
-<td><code>7182b437c586a680</code></td>
+<td><code>292643985e5af3f2</code></td>
 </tr>
 <tr>
 <td>Paper version</td>
@@ -2049,7 +2118,7 @@ runs satisfied <code>gradient_descent()</code> convergence
 class="math inline">\(\alpha = 1.0\)</span>)</li>
 <li>Largest recorded iteration count: 1000 (at <span
 class="math inline">\(\alpha = 0.01\)</span>)</li>
-<li>Mean iterations across all rows: 372</li>
+<li>Mean iterations across all rows: 351</li>
 </ul>
 <h3 data-number="7.3.2" id="numerical-stability"><span
 class="header-section-number">7.3.2</span> Numerical Stability</h3>
@@ -2064,16 +2133,16 @@ class="header-section-number">7.3.3</span> Benchmark Demonstration</h3>
 <p>This exemplar also demonstrates
 <code>infrastructure.benchmark</code>. The thin orchestrator
 <code>scripts/04_benchmark_stage.py</code> calls
-<code>src/benchmark_support.py</code>, which times the pure
-<code>quadratic_function</code> across a fixed set of input sizes
-(deterministic seed, no network) and turns the timing facts into boolean
-rubric checks. Those checks are scored through the shared
+<code>src/benchmark_support.py</code>, which evaluates the pure
+<code>quadratic_function</code> across fixed seeded inputs and turns
+reproducible completion, finiteness, and output-stability facts into
+boolean rubric checks. Those checks are scored through
 <code>infrastructure.benchmark.score_rubric</code> against a weighted
-<code>RubricSet</code>, and the result is rendered with
-<code>scores_to_markdown</code> into
-<code>output/reports/benchmark_report.json</code> (plus an optional
-timing figure). This keeps the benchmark API exercised by a real
-exemplar, not by infrastructure tests alone.</p>
+<code>RubricSet</code>, then rendered with
+<code>scores_to_markdown</code> into the byte-stable
+<code>output/reports/benchmark_report.json</code> with a deterministic
+objective-value figure. Real timing still executes as a runtime
+diagnostic, but it is not serialized into tracked evidence.</p>
 <h2 data-number="7.4" id="madlib-injection-verification"><span
 class="header-section-number">7.4</span> Madlib Injection
 Verification</h2>

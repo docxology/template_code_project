@@ -20,9 +20,18 @@ from src.analysis import (
     run_performance_benchmarking,
     run_stability_analysis,
     save_optimization_results,
+    infrastructure_context,
 )
 from src.experiment_config import ExperimentConfig, load_experiment_config
 from src.optimizer import OptimizationResult
+from src.project_paths import project_root_context
+
+
+@pytest.fixture(autouse=True)
+def _isolated_project_root(tmp_path: Path):
+    with project_root_context(tmp_path):
+        yield
+
 
 try:
     from src.figures import (
@@ -55,7 +64,6 @@ class TestRunConvergenceExperiment:
 
 class TestSaveOptimizationResults:
     def test_csv_serializes_full_solution_vector(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
         results = {
             0.1: OptimizationResult(
                 solution=np.array([1.0, 2.0]),
@@ -68,22 +76,29 @@ class TestSaveOptimizationResults:
         path = save_optimization_results(results)
         text = path.read_text()
         assert "1.000000;2.000000" in text
+        assert "termination_reason" in text.splitlines()[0]
+        assert text.rstrip().endswith(",unknown")
 
 
 class TestScientificAnalysis:
     def test_stability_analysis_writes_report(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
         path = run_stability_analysis()
         assert path.exists()
         data = json.loads(path.read_text())
         assert "stability_score" in data
 
     def test_benchmark_writes_report(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
         path = run_performance_benchmarking()
         assert path.exists()
+        first_bytes = path.read_bytes()
+        second_path = run_performance_benchmarking()
+        assert second_path.read_bytes() == first_bytes
         data = json.loads(path.read_text())
-        assert "execution_time" in data
+        assert data["schema_version"] == "template_code_project/performance_benchmark/v2"
+        assert data["checks"]["all_inputs_evaluated"] is True
+        assert data["checks"]["all_objective_values_finite"] is True
+        assert "execution_time" not in data
+        assert "timestamp" not in data
 
 
 class TestExtractOptimizationMetadata:
@@ -115,20 +130,17 @@ class TestExtractOptimizationMetadata:
 
 
 class TestAnalysisStandalonePaths:
-    def test_stability_analysis_without_infra(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.INFRASTRUCTURE_AVAILABLE", False)
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
-        path = run_stability_analysis()
+    def test_stability_analysis_without_infra(self, tmp_path: Path):
+        with infrastructure_context(False):
+            path = run_stability_analysis()
         assert path.exists()
 
-    def test_benchmark_without_infra(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.INFRASTRUCTURE_AVAILABLE", False)
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
-        path = run_performance_benchmarking()
+    def test_benchmark_without_infra(self, tmp_path: Path):
+        with infrastructure_context(False):
+            path = run_performance_benchmarking()
         assert path.exists()
 
-    def test_stability_score_standalone(self, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.INFRASTRUCTURE_AVAILABLE", False)
+    def test_stability_score_standalone(self):
         cfg = ExperimentConfig(stability_starting_points=(0.0, 10.0))
         from src.analysis import _stability_score_from_runs
 
@@ -151,7 +163,6 @@ class TestAnalysisStandalonePaths:
 
 class TestPublishingHelpers:
     def test_citations_and_save_materials(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
         from src.analysis import generate_citations_from_metadata, save_publishing_materials
 
         meta = {
@@ -167,7 +178,6 @@ class TestPublishingHelpers:
         assert (tmp_path / "output" / "citations" / "optimization_metadata.json").exists()
 
     def test_save_publishing_materials_handles_missing_keys(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
         from src.analysis import save_publishing_materials
 
         save_publishing_materials({"title": "only title"}, None)
@@ -178,7 +188,6 @@ class TestValidationAndRegistration:
     def test_validate_and_save_report(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         if not __import__("src.analysis", fromlist=["INFRASTRUCTURE_AVAILABLE"]).INFRASTRUCTURE_AVAILABLE:
             pytest.skip("Infrastructure not available")
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
         (tmp_path / "output" / "figures").mkdir(parents=True)
         (tmp_path / "output" / "figures" / "convergence_plot.png").write_bytes(b"png")
 
@@ -190,7 +199,6 @@ class TestValidationAndRegistration:
             assert path is not None and path.exists()
 
     def test_register_figure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
         (tmp_path / "output" / "figures").mkdir(parents=True)
         from src.analysis import register_figure
 
@@ -204,8 +212,6 @@ class TestMainPipelineSmoke:
         import shutil
 
         shutil.copytree(PROJECT_ROOT / "manuscript", tmp_path / "manuscript")
-        monkeypatch.setattr("src.analysis.project_root", tmp_path)
-        monkeypatch.setattr("src.figures.project_root", tmp_path)
 
         from src.analysis import main
 
@@ -255,7 +261,7 @@ class TestStabilityAnalysis:
 class TestPerformanceBenchmarking:
     """Test performance benchmarking functions."""
 
-    def test_performance_benchmarking_execution(self):
+    def test_performance_benchmarking_execution(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         result_path = run_performance_benchmarking()
 
         if result_path:
@@ -263,16 +269,16 @@ class TestPerformanceBenchmarking:
             assert result_path.is_file()
 
             data = json.loads(result_path.read_text())
-            assert "execution_time" in data
             assert "function_name" in data
             assert "result_summary" in data
-            assert "iterations" in data
-            assert isinstance(data["execution_time"], (int, float))
-            assert data["execution_time"] > 0
+            assert "diagnostic_iterations_per_input" in data
+            assert data["observations"]
+            assert "execution_time" not in data
+            assert "timestamp" not in data
         else:
             pytest.fail("Performance benchmarking returned None")
 
-    def test_performance_visualization(self):
+    def test_performance_visualization(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         report_path = run_performance_benchmarking()
 
         if report_path:
@@ -282,6 +288,9 @@ class TestPerformanceBenchmarking:
                 assert viz_path.exists()
                 assert viz_path.is_file()
                 assert viz_path.suffix == ".png"
+                first_bytes = viz_path.read_bytes()
+                second_path = generate_benchmark_visualization(report_path)
+                assert second_path.read_bytes() == first_bytes
             else:
                 pytest.fail("Performance visualization returned None")
         else:
@@ -494,9 +503,7 @@ class TestMultiFactorAnalysis:
         from src.experiment_config import ExperimentConfig
 
         cfg = ExperimentConfig(step_sizes=(0.1,), max_iterations=200)
-        report = multi_factor_analysis(
-            config=cfg, factor_weights={"convergence": 0.8, "stability": 0.2}
-        )
+        report = multi_factor_analysis(config=cfg, factor_weights={"convergence": 0.8, "stability": 0.2})
         assert sum(report.factor_weights.values()) == pytest.approx(1.0)
 
     def test_custom_factor_weights_with_unknown_key(self):
@@ -506,9 +513,7 @@ class TestMultiFactorAnalysis:
 
         cfg = ExperimentConfig(step_sizes=(0.1,), max_iterations=200)
         # "nonexistent_key" is not in the defaults → silently skipped
-        report = multi_factor_analysis(
-            config=cfg, factor_weights={"convergence": 0.5, "nonexistent_key": 99.0}
-        )
+        report = multi_factor_analysis(config=cfg, factor_weights={"convergence": 0.5, "nonexistent_key": 99.0})
         # Normalisation should still work with valid keys only
         assert sum(report.factor_weights.values()) == pytest.approx(1.0)
         # The unknown key should not appear in the final weights
@@ -588,8 +593,6 @@ class TestMultiFactorAnalysis:
     def test_stability_fallback_recomputes_when_scores_none(self):
         """When no variant has stability_score, multi_factor_analysis recomputes it."""
         from src.analysis import (
-            AlgorithmComparison,
-            AlgorithmVariant,
             compare_algorithms,
             multi_factor_analysis,
         )
@@ -659,7 +662,6 @@ class TestMultiFactorAnalysis:
         from src.analysis import (
             AlgorithmComparison,
             AlgorithmVariant,
-            MultiFactorReport,
             multi_factor_analysis,
         )
         from src.experiment_config import ExperimentConfig

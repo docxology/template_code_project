@@ -179,6 +179,20 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
   fontURL: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/woff2",
   dynamicPrefix: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/dynamic"
 });
+window.normalizeTemplateMathJaxAria = function () {
+  document.querySelectorAll("mjx-speech[aria-roledescription]").forEach(function (node) {
+    var roleDescription = node.getAttribute("aria-roledescription") || "";
+    if (/[-]/.test(roleDescription)) {
+      node.setAttribute("aria-roledescription", "mathematical expression");
+    }
+  });
+};
+window.MathJax.startup = Object.assign({}, window.MathJax.startup, {
+  ready: function () {
+    window.MathJax.startup.defaultReady();
+    window.MathJax.startup.promise.then(window.normalizeTemplateMathJaxAria);
+  }
+});
 </script>
 <script defer=""
   src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-chtml.js"
@@ -187,7 +201,8 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
 <link data-template-favicon rel="icon" href="favicon.ico">
 </head>
 <body>
-<main id="main-content">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<main id="main-content" tabindex="-1">
 <h1 id="sec:introduction">Introduction</h1>
 <p>This <code>template_code_project</code> serves as the foundational
 exemplar for the <a
@@ -242,8 +257,9 @@ leverages the <code>infrastructure</code> layer:</p>
 <ul>
 <li><strong>Scientific Utilities</strong>: Utilizing
 <code>infrastructure.scientific.stability</code> and
-<code>infrastructure.scientific.benchmarking</code> to guarantee
-numerical boundaries and performance scaling.</li>
+<code>infrastructure.scientific.benchmarking</code> to check numerical
+boundaries and exercise runtime performance diagnostics without pinning
+host-dependent timings.</li>
 <li><strong>Hermetic Validation</strong>: Deploying
 <code>infrastructure.validation</code> components
 (<code>markdown_validator</code>, <code>output_validator</code>) to

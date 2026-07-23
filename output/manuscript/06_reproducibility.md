@@ -6,7 +6,7 @@ This section provides a machine-verifiable reproducibility certificate for the c
 
 | Property                          | Value                 |
 | --------------------------------- | --------------------- |
-| Config hash (SHA-256, truncated)  | `7182b437c586a680`     |
+| Config hash (SHA-256, truncated)  | `292643985e5af3f2`     |
 | Paper version                     | 2.5.2    |
 | First author                      | Daniel Ari Friedman |
 | Keywords                          | optimization algorithms, gradient descent, convergence analysis, numerical methods, mathematical programming, reproducible research, infrastructure automation   |
@@ -34,7 +34,7 @@ Within the configured grid, **4** of **6** runs satisfied `gradient_descent()` c
 - Non-convergent or hit-iteration-cap step sizes: 0.01, 2.5
 - Smallest recorded iteration count: 1 (at $\alpha = 1.0$)
 - Largest recorded iteration count: 1000 (at $\alpha = 0.01$)
-- Mean iterations across all rows: 372
+- Mean iterations across all rows: 351
 
 ### Numerical Stability
 
@@ -44,7 +44,7 @@ The stability analysis tested 48 parameter combinations (8 starting points $\tim
 
 ### Benchmark Demonstration
 
-This exemplar also demonstrates `infrastructure.benchmark`. The thin orchestrator `scripts/04_benchmark_stage.py` calls `src/benchmark_support.py`, which times the pure `quadratic_function` across a fixed set of input sizes (deterministic seed, no network) and turns the timing facts into boolean rubric checks. Those checks are scored through the shared `infrastructure.benchmark.score_rubric` against a weighted `RubricSet`, and the result is rendered with `scores_to_markdown` into `output/reports/benchmark_report.json` (plus an optional timing figure). This keeps the benchmark API exercised by a real exemplar, not by infrastructure tests alone.
+This exemplar also demonstrates `infrastructure.benchmark`. The thin orchestrator `scripts/04_benchmark_stage.py` calls `src/benchmark_support.py`, which evaluates the pure `quadratic_function` across fixed seeded inputs and turns reproducible completion, finiteness, and output-stability facts into boolean rubric checks. Those checks are scored through `infrastructure.benchmark.score_rubric` against a weighted `RubricSet`, then rendered with `scores_to_markdown` into the byte-stable `output/reports/benchmark_report.json` with a deterministic objective-value figure. Real timing still executes as a runtime diagnostic, but it is not serialized into tracked evidence.
 
 ## Madlib Injection Verification
 

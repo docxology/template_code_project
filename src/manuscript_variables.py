@@ -4,7 +4,6 @@ Reads:
 - ``manuscript/config.yaml``          — experiment parameters and paper metadata
 - ``output/data/optimization_results.csv``  — per-step-size convergence data
 - ``output/reports/stability_analysis.json``
-- ``output/reports/performance_benchmark.json``
 
 Returns a flat ``dict[str, str]`` of UPPERCASE_KEY → value for
 ``{{TOKEN}}`` substitution via
@@ -143,6 +142,26 @@ def _step_agency_label(alpha: float) -> str:
     return "divergent (expected unstable for H = I)"
 
 
+def _parse_solution_vector(value: str) -> list[float]:
+    """Parse the semicolon-delimited solution format emitted by the CSV writer."""
+    parts = [part.strip() for part in value.split(";")]
+    if not parts or any(not part for part in parts):
+        raise ValueError(f"solution must contain one or more numeric values, got {value!r}")
+    try:
+        solution = [float(part) for part in parts]
+    except ValueError as exc:
+        raise ValueError(f"solution must contain numeric values, got {value!r}") from exc
+    if not all(np.isfinite(component) for component in solution):
+        raise ValueError(f"solution must contain finite values, got {value!r}")
+    return solution
+
+
+def _format_solution_vector(solution: list[float], *, precision: int = 4) -> str:
+    """Format scalar solutions compactly and vector solutions unambiguously."""
+    formatted = [f"{value:.{precision}f}" for value in solution]
+    return formatted[0] if len(formatted) == 1 else "[" + ", ".join(formatted) + "]"
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -180,7 +199,6 @@ def generate_variables(project_root: Path, *, require_analysis_outputs: bool = F
             "Run projects/templates/template_code_project/scripts/optimization_analysis.py first."
         )
     stability = _load_json_report(project_root, "stability_analysis.json")
-    benchmark = _load_json_report(project_root, "performance_benchmark.json")
     artifact_counts = _count_output_artifacts(project_root)
 
     variables: dict[str, str] = {}
@@ -222,7 +240,7 @@ def generate_variables(project_root: Path, *, require_analysis_outputs: bool = F
     # ---- Results-derived ----
     if results:
         x_star, f_star = quadratic_optimum(exp_cfg.A_array(), exp_cfg.b_array())
-        variables["RESULT_OPTIMUM_X"] = f"{x_star[0]:.1f}"
+        variables["RESULT_OPTIMUM_X"] = _format_solution_vector(x_star.tolist(), precision=1)
         variables["RESULT_OPTIMUM_F"] = f"{f_star:.1f}"
 
         iterations_list = [int(r["iterations"]) for r in results]
@@ -242,16 +260,17 @@ def generate_variables(project_root: Path, *, require_analysis_outputs: bool = F
 
         table_rows = []
         for r in results:
-            sol = float(r["solution"])
+            sol = _format_solution_vector(_parse_solution_vector(r["solution"]))
             obj = float(r["objective_value"])
             iters = int(r["iterations"])
             conv = "Yes" if r["converged"] == "True" else "No"
+            termination_reason = r.get("termination_reason") or ("converged" if conv == "Yes" else "unknown")
             table_rows.append(
                 f"| {float(r['step_size']):.2f}          "
-                f"| {sol:.4f}         "
+                f"| {sol:<16} "
                 f"| {obj:.4f}          "
                 f"| {iters:<10} "
-                f"| {conv:<9} |"
+                f"| {conv:<9} | {termination_reason:<16} |"
             )
         variables["RESULT_TABLE_ROWS"] = "\n".join(table_rows)
 
@@ -289,16 +308,12 @@ def generate_variables(project_root: Path, *, require_analysis_outputs: bool = F
             "RESULT_WORST_STEP_SIZE",
         ):
             variables[key] = "N/A"
-        variables["RESULT_TABLE_ROWS"] = "| N/A | N/A | N/A | N/A | N/A |"
+        variables["RESULT_TABLE_ROWS"] = "| N/A | N/A | N/A | N/A | N/A | N/A |"
         variables["RESULT_CONVERGENCE_FACTORS"] = "- No data available"
 
     # ---- Stability-derived ----
     variables["STABILITY_SCORE"] = f"{float(stability.get('stability_score', 0.0)):.2f}"
     variables["STABILITY_FUNCTION"] = str(stability.get("function_name", "N/A"))
-
-    # ---- Benchmark-derived ----
-    exec_time = benchmark.get("execution_time")
-    variables["BENCHMARK_AVG_TIME"] = f"{float(exec_time) * 1e6:.1f}" if exec_time else "N/A"
 
     # ---- Artifact counts ----
     variables["ARTIFACT_FIGURES"] = str(artifact_counts.get("figures", 0))

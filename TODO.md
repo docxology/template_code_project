@@ -12,6 +12,7 @@ thin-orchestrator control-positive path for code-centric research projects.
 - Stage 04 output validation: `uv run python scripts/pipeline/stage_04_validate.py --project templates/template_code_project`
 - Repo drift gate: `uv run python scripts/audit/check_template_drift.py --strict`
 - Code quality: `uv run ruff check projects/templates/template_code_project/src/` and `uv run mypy projects/templates/template_code_project/src/` must both pass clean.
+- Benchmark reproducibility: tracked benchmark reports and figures contain only deterministic facts; wall-clock timing is logged as a runtime diagnostic, and two-run byte-equality tests enforce the boundary.
 - Live test count and measured coverage percentage → [`docs/_generated/COUNTS.md`](../../../docs/_generated/COUNTS.md) (regenerated, never hardcoded here; both numbers drift faster than this file).
 
 ## Integrity and template-status gaps
@@ -19,7 +20,7 @@ thin-orchestrator control-positive path for code-centric research projects.
 - Keep this exemplar as the smallest reliable control-positive path for code-centric research projects.
 - Keep dashboard, API docs, figures, and manuscript variables generated from source, not hand-maintained output snapshots.
 - Add a project-local output validation script only if it checks artifacts beyond the generic Stage 04 validators.
-- Add or document a stable final artifact-manifest refresh path for single-stage analysis/render/copy checks.
+- Add or document a stable final artifact-manifest refresh path for single-stage analysis/render/copy checks. **Documented:** `infrastructure.core.pipeline.artifacts.snapshot_current_artifact_manifest` serves this role.
 
 ## Configurable-surface gaps
 

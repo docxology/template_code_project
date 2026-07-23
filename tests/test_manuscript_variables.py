@@ -68,7 +68,14 @@ def _make_minimal_project(tmp_path: Path, *, with_results: bool = True) -> Path:
         with (data_dir / "optimization_results.csv").open("w", newline="") as f:
             writer = csv.DictWriter(
                 f,
-                fieldnames=["step_size", "solution", "objective_value", "iterations", "converged"],
+                fieldnames=[
+                    "step_size",
+                    "solution",
+                    "objective_value",
+                    "iterations",
+                    "converged",
+                    "termination_reason",
+                ],
             )
             writer.writeheader()
             writer.writerows(
@@ -83,11 +90,6 @@ def _make_minimal_project(tmp_path: Path, *, with_results: bool = True) -> Path:
             json.dumps({"stability_score": 0.95, "function_name": "quadratic_function"}),
             encoding="utf-8",
         )
-        (reports_dir / "performance_benchmark.json").write_text(
-            json.dumps({"execution_time": 0.000123}),
-            encoding="utf-8",
-        )
-
     return tmp_path
 
 
@@ -98,6 +100,7 @@ def _result_row(step_size: str, *, iterations: str, converged: str = "True") -> 
         "objective_value": "-4.0",
         "iterations": iterations,
         "converged": converged,
+        "termination_reason": "converged" if converged == "True" else "max_iterations",
     }
 
 
@@ -169,17 +172,33 @@ def test_result_derived_values(tmp_path):
     assert v["RESULT_MIN_ITERATIONS"] == "1"
     assert v["RESULT_MAX_ITERATIONS"] == "50"
     assert v["RESULT_BEST_STEP_SIZE"] == "1.0"
-    assert v["RESULT_TABLE_ROWS"] != "| N/A | N/A | N/A | N/A | N/A |"
+    assert v["RESULT_TABLE_ROWS"] != "| N/A | N/A | N/A | N/A | N/A | N/A |"
 
 
-def test_stability_and_benchmark_derived(tmp_path):
+def test_vector_solution_rows_are_rendered_without_scalar_coercion(tmp_path):
+    """Hydration accepts the semicolon-delimited n-D solution CSV format."""
+    rows = [
+        {
+            "step_size": "0.1",
+            "solution": "1.0;2.0",
+            "objective_value": "-1.5",
+            "iterations": "12",
+            "converged": "True",
+            "termination_reason": "converged",
+        }
+    ]
+    root = _make_project_with_rows(tmp_path, rows)
+    variables = generate_variables(root)
+
+    assert "[1.0000, 2.0000]" in variables["RESULT_TABLE_ROWS"]
+
+
+def test_stability_derived(tmp_path):
     root = _make_minimal_project(tmp_path)
     v = generate_variables(root)
 
     assert v["STABILITY_SCORE"] == "0.95"
     assert v["STABILITY_FUNCTION"] == "quadratic_function"
-    assert v["BENCHMARK_AVG_TIME"] != "N/A"
-    assert float(v["BENCHMARK_AVG_TIME"]) > 0
 
 
 def test_fallback_sentinels_when_no_results(tmp_path):
@@ -187,10 +206,9 @@ def test_fallback_sentinels_when_no_results(tmp_path):
     v = generate_variables(root)
 
     assert v["RESULT_NUM_CONVERGED"] == "N/A"
-    assert v["RESULT_TABLE_ROWS"] == "| N/A | N/A | N/A | N/A | N/A |"
+    assert v["RESULT_TABLE_ROWS"] == "| N/A | N/A | N/A | N/A | N/A | N/A |"
     assert v["RESULT_CONVERGENCE_FACTORS"] == "- No data available"
     assert v["STABILITY_SCORE"] == "0.00"
-    assert v["BENCHMARK_AVG_TIME"] == "N/A"
 
 
 def test_provenance_keys_populated(tmp_path):
@@ -242,7 +260,14 @@ def _make_project_with_rows(tmp_path: Path, rows: list[dict]) -> Path:
     with (data_dir / "optimization_results.csv").open("w", newline="") as f:
         writer = csv.DictWriter(
             f,
-            fieldnames=["step_size", "solution", "objective_value", "iterations", "converged"],
+            fieldnames=[
+                "step_size",
+                "solution",
+                "objective_value",
+                "iterations",
+                "converged",
+                "termination_reason",
+            ],
         )
         writer.writeheader()
         for row in rows:
@@ -250,7 +275,6 @@ def _make_project_with_rows(tmp_path: Path, rows: list[dict]) -> Path:
     (reports_dir / "stability_analysis.json").write_text(
         '{"stability_score": 0.8, "function_name": "f"}', encoding="utf-8"
     )
-    (reports_dir / "performance_benchmark.json").write_text('{"execution_time": 0.0001}', encoding="utf-8")
     return root
 
 
@@ -464,9 +488,7 @@ def test_step_sensitivity_caption_numbers_match_sweep():
     first_iters = sweep.iterations[0]
     last_iters = sweep.iterations[-1]
 
-    caption = (Path(__file__).resolve().parent.parent / "manuscript" / "03_results.md").read_text(
-        encoding="utf-8"
-    )
+    caption = (Path(__file__).resolve().parent.parent / "manuscript" / "03_results.md").read_text(encoding="utf-8")
     assert f"({n_points} points)" in caption
     assert f"{first_iters} iterations at the smallest" in caption
     assert f"to {last_iters} iterations at" in caption

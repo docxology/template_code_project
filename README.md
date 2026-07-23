@@ -111,7 +111,9 @@ block, the combined PDF is built with `mmdc`, which needs a pinned
 `chrome-headless-shell` (CI provisions it; a fresh clone does not):
 
 ```bash
-npx --yes puppeteer browsers install chrome-headless-shell
+npm ci
+npx --no-install puppeteer browsers install chrome-headless-shell
+export PATH="$PWD/node_modules/.bin:$PATH"
 ```
 
 Without it the **PDF Rendering** stage fails while slides still render — see
@@ -172,7 +174,17 @@ regardless of whether their domain is optimization.
 uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
 ```
 
-Generates convergence plots, performs scientific validation, creates dashboard, and saves all results.
+Generates convergence plots, performs scientific validation, and saves all results.
+
+### Build Dashboard
+
+```bash
+uv run python projects/templates/template_code_project/scripts/build_dashboard.py
+```
+
+Builds the HTML analysis dashboard from the outputs produced above (a separate
+step — `optimization_analysis.py` does not build the dashboard itself; see
+`src/AGENTS.md` for the module split).
 
 ### Run Tests
 

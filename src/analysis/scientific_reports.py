@@ -17,9 +17,15 @@ except ImportError:  # pragma: no cover
     from experiment_config import ExperimentConfig, load_experiment_config  # type: ignore[no-redef]
     from optimizer import compute_gradient, gradient_descent, quadratic_function, quadratic_optimum  # type: ignore[no-redef]
 
-from ._infra import ValidationError
+from ._infra import ValidationError, infrastructure_available
 from ._logging import get_logger
 from .experiments import _project_root
+
+
+BENCHMARK_TIMING_POLICY = (
+    "Wall-clock timing and memory measurements are environment-dependent runtime "
+    "diagnostics and are intentionally omitted from this tracked artifact."
+)
 
 
 def _root() -> Path:
@@ -74,9 +80,42 @@ def _benchmark_timings(
     return float(np.mean(timings))
 
 
+def _canonical_benchmark_payload(
+    test_inputs: list[np.ndarray],
+    A: np.ndarray,
+    b: np.ndarray,
+    *,
+    diagnostic_iterations: int,
+) -> dict[str, Any]:
+    """Build byte-stable benchmark facts without host-dependent measurements."""
+    objective_values = [float(quadratic_function(test_input, A, b)) for test_input in test_inputs]
+    observations = [
+        {
+            "input": [float(value) for value in test_input],
+            "objective_value": objective_value,
+        }
+        for test_input, objective_value in zip(test_inputs, objective_values, strict=True)
+    ]
+    return {
+        "schema_version": "template_code_project/performance_benchmark/v2",
+        "function_name": "quadratic_function",
+        "diagnostic_iterations_per_input": diagnostic_iterations,
+        "input_count": len(test_inputs),
+        "observations": observations,
+        "checks": {
+            "all_inputs_evaluated": len(observations) == len(test_inputs),
+            "all_objective_values_finite": all(np.isfinite(objective_value) for objective_value in objective_values),
+        },
+        "timing_policy": BENCHMARK_TIMING_POLICY,
+        "result_summary": (
+            f"{len(observations)} deterministic objective evaluations; runtime timing omitted from tracked artifact"
+        ),
+    }
+
+
 def run_stability_analysis(config: ExperimentConfig | None = None) -> Path:
     """Assess numerical stability of optimization algorithms."""
-    from . import INFRASTRUCTURE_AVAILABLE, check_numerical_stability
+    from . import check_numerical_stability
 
     logger = get_logger()
     logger.info("Running numerical stability analysis...")
@@ -87,7 +126,7 @@ def run_stability_analysis(config: ExperimentConfig | None = None) -> Path:
     _, optimal_value = quadratic_optimum(A, b)
     test_inputs = [np.array([float(x)]) for x in cfg.stability_starting_points[:4]]
 
-    if INFRASTRUCTURE_AVAILABLE and check_numerical_stability is not None:
+    if infrastructure_available() and check_numerical_stability is not None:
         stability_report = check_numerical_stability(
             func=functools.partial(quadratic_function, A=A, b=b),
             test_inputs=test_inputs,
@@ -122,8 +161,8 @@ def run_stability_analysis(config: ExperimentConfig | None = None) -> Path:
 
 
 def run_performance_benchmarking(config: ExperimentConfig | None = None) -> Path:
-    """Benchmark gradient descent performance."""
-    from . import INFRASTRUCTURE_AVAILABLE, benchmark_function
+    """Run timing diagnostics and write a deterministic benchmark contract."""
+    from . import benchmark_function
 
     logger = get_logger()
     logger.info("Running performance benchmarking...")
@@ -132,56 +171,51 @@ def run_performance_benchmarking(config: ExperimentConfig | None = None) -> Path
     A = cfg.A_array()
     b = cfg.b_array()
     test_inputs = [np.array([0.0]), np.array([5.0]), np.array([20.0])]
+    diagnostic_iterations = 50
 
-    if INFRASTRUCTURE_AVAILABLE and benchmark_function is not None:
+    if infrastructure_available() and benchmark_function is not None:
         benchmark_report = benchmark_function(
             func=functools.partial(quadratic_function, A=A, b=b),
             test_inputs=test_inputs,
-            iterations=50,
+            iterations=diagnostic_iterations,
         )
-        benchmark_data = {
-            "function_name": benchmark_report.function_name,
-            "execution_time": benchmark_report.execution_time,
-            "memory_usage": benchmark_report.memory_usage,
-            "iterations": benchmark_report.iterations,
-            "result_summary": benchmark_report.result_summary,
-            "timestamp": benchmark_report.timestamp,
-        }
         avg_time = benchmark_report.execution_time
     else:
-        avg_time = _benchmark_timings(test_inputs, A, b)
-        benchmark_data = {
-            "function_name": "quadratic_function",
-            "execution_time": avg_time,
-            "memory_usage": 0.0,
-            "iterations": 50,
-            "result_summary": f"Avg {avg_time * 1e6:.1f}μs across {len(test_inputs)} inputs",
-            "timestamp": _time.strftime("%Y-%m-%dT%H:%M:%S"),
-        }
+        avg_time = _benchmark_timings(test_inputs, A, b, iterations=diagnostic_iterations)
+
+    benchmark_data = _canonical_benchmark_payload(
+        test_inputs,
+        A,
+        b,
+        diagnostic_iterations=diagnostic_iterations,
+    )
 
     output_dir = _root() / "output" / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     benchmark_path = output_dir / "performance_benchmark.json"
-    with open(benchmark_path, "w") as f:
-        json.dump(benchmark_data, f, indent=2, default=str)
+    benchmark_path.write_text(
+        json.dumps(benchmark_data, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
-    logger.info("Performance benchmarking complete - Avg time: %.6fs", avg_time)
+    logger.info("Runtime-only benchmark diagnostic complete - Avg time: %.6fs", avg_time)
     logger.info("Saved benchmark report to: %s", benchmark_path)
     return benchmark_path
 
 
-def validate_generated_outputs() -> Any:
+def validate_generated_outputs(*, integrity_validator: Any = None) -> Any:
     """Validate integrity of generated analysis outputs."""
-    from . import INFRASTRUCTURE_AVAILABLE, verify_output_integrity
+    from . import verify_output_integrity
 
     logger = get_logger()
-    if not INFRASTRUCTURE_AVAILABLE or verify_output_integrity is None:
+    validate_integrity = integrity_validator or verify_output_integrity
+    if not infrastructure_available() or validate_integrity is None:
         logger.info("Skipping output validation (infrastructure not available)")
         return None
 
     logger.info("Validating generated outputs...")
     try:
-        integrity_report = verify_output_integrity(_root() / "output")
+        integrity_report = validate_integrity(_root() / "output")
         validation_summary = {
             "integrity_check": {
                 "total_files": len(integrity_report.file_integrity),
@@ -206,7 +240,7 @@ def validate_generated_outputs() -> Any:
         return None
 
 
-def save_validation_report(validation_report: Any) -> Any:
+def save_validation_report(validation_report: Any, *, file_opener: Any = open) -> Any:
     """Save validation report to file."""
     logger = get_logger()
     if not validation_report:
@@ -215,7 +249,7 @@ def save_validation_report(validation_report: Any) -> Any:
         output_dir = _root() / "output" / "reports"
         output_dir.mkdir(parents=True, exist_ok=True)
         report_path = output_dir / "output_validation.json"
-        with open(report_path, "w") as f:
+        with file_opener(report_path, "w") as f:
             json.dump(validation_report, f, indent=2, default=str)
         logger.info("Saved validation report to: %s", report_path)
         return report_path
@@ -224,16 +258,17 @@ def save_validation_report(validation_report: Any) -> Any:
         return None
 
 
-def register_figure() -> None:
+def register_figure(*, figure_manager_factory: Any = None) -> None:
     """Register generated figures for manuscript reference."""
     logger = get_logger()
     try:
         from ._infra import FigureManager
 
-        if FigureManager is None:
+        manager_factory = figure_manager_factory or FigureManager
+        if manager_factory is None:
             raise ImportError("FigureManager unavailable")
         registry_file = _root() / "output" / "figures" / "figure_registry.json"
-        fm = FigureManager(registry_file=str(registry_file))
+        fm = manager_factory(registry_file=str(registry_file))
         figures = [
             ("convergence_plot.png", "Gradient descent convergence for different step sizes", "fig:convergence"),
             (
@@ -278,7 +313,9 @@ def register_figure() -> None:
 
 
 __all__ = [
+    "BENCHMARK_TIMING_POLICY",
     "_benchmark_timings",
+    "_canonical_benchmark_payload",
     "_stability_score_from_runs",
     "register_figure",
     "run_performance_benchmarking",

@@ -238,11 +238,12 @@ directory map used across `analysis/`, `figures/`, and `dashboard.py`.
 ### benchmark_support.py
 
 Thin domain helper demonstrating `infrastructure.benchmark` from inside the
-exemplar: times the pure `quadratic_function` across a fixed, deterministic
-set of input sizes, turns the timing facts into boolean rubric checks, and
-scores them through the real `infrastructure.benchmark` rubric API.
-Orchestration (writing reports/figures) lives in `scripts/`; this module only
-computes.
+exemplar: evaluates the pure `quadratic_function` across fixed seeded inputs,
+turns reproducible completion/finite-output/stability facts into boolean rubric
+checks, and scores them through the real `infrastructure.benchmark` API.
+Wall-clock measurements remain runtime-only diagnostics and are omitted from
+the tracked payload. Orchestration (writing reports/figures) lives in
+`scripts/`; this module only computes.
 
 #### load_experiment_config (function)
 
@@ -301,6 +302,7 @@ class OptimizationResult:
         converged: bool - Whether convergence criteria were met
         gradient_norm: float - Final gradient norm
         objective_history: Optional[list[float]] - Objective values at each iteration
+        termination_reason: str - ``converged``, ``max_iterations``, or ``non_finite``
     """
 ```
 

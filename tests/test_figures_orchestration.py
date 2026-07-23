@@ -17,6 +17,7 @@ from src.figures import (
     generate_step_size_sensitivity_plot,
 )
 from src.optimizer import OptimizationResult, quadratic_optimum
+from src.project_paths import project_root_context
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -45,10 +46,10 @@ def _sample_results(cfg: ExperimentConfig) -> dict[float, OptimizationResult]:
 
 
 @pytest.fixture
-def figure_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    monkeypatch.setattr("src.figures.project_root", tmp_path)
+def figure_root(tmp_path: Path):
     (tmp_path / "output" / "figures").mkdir(parents=True)
-    return tmp_path
+    with project_root_context(tmp_path):
+        yield tmp_path
 
 
 class TestFiguresOrchestration:
@@ -107,9 +108,12 @@ class TestFiguresOrchestration:
     def test_benchmark_visualization(self, figure_root: Path):
         report = figure_root / "output" / "reports" / "performance_benchmark.json"
         report.parent.mkdir(parents=True)
-        report.write_text(json.dumps({"execution_time": 0.001}))
+        report.write_text(json.dumps({"schema_version": "template_code_project/performance_benchmark/v2"}))
         path = generate_benchmark_visualization(report)
         assert path is not None and path.exists()
+        first_bytes = path.read_bytes()
+        second_path = generate_benchmark_visualization(report)
+        assert second_path.read_bytes() == first_bytes
 
     def test_stability_visualization_none_path(self):
         assert generate_stability_visualization(None) is None
@@ -172,7 +176,6 @@ class TestBackendProfile:
     def test_compare_profiles_at_alpha_returns_one_row_per_profile(self):
         """Lines 232-247: compare_profiles_at_alpha covers the loop + dict build."""
         from src.figures.scientific_complexity import (
-            BACKEND_PROFILES,
             BackendProfile,
             compare_profiles_at_alpha,
         )

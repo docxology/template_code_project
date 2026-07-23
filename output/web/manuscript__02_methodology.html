@@ -179,6 +179,20 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
   fontURL: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/woff2",
   dynamicPrefix: "https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font@4.0.0/chtml/dynamic"
 });
+window.normalizeTemplateMathJaxAria = function () {
+  document.querySelectorAll("mjx-speech[aria-roledescription]").forEach(function (node) {
+    var roleDescription = node.getAttribute("aria-roledescription") || "";
+    if (/[-]/.test(roleDescription)) {
+      node.setAttribute("aria-roledescription", "mathematical expression");
+    }
+  });
+};
+window.MathJax.startup = Object.assign({}, window.MathJax.startup, {
+  ready: function () {
+    window.MathJax.startup.defaultReady();
+    window.MathJax.startup.promise.then(window.normalizeTemplateMathJaxAria);
+  }
+});
 </script>
 <script defer=""
   src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-chtml.js"
@@ -187,7 +201,8 @@ window.MathJax.chtml = Object.assign({}, window.MathJax.chtml, {
 <link data-template-favicon rel="icon" href="favicon.ico">
 </head>
 <body>
-<main id="main-content">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<main id="main-content" tabindex="-1">
 <h1 id="sec:methodology">Methodology</h1>
 <p>This section describes the implementation methodology, explicitly
 detailing how the optimization algorithms are constructed, validated,
@@ -247,13 +262,14 @@ href="https://github.com/docxology/template/blob/main/scripts/pipeline/stage_02_
 orchestrator</a> execution deliberately aborts, ensuring the methodology
 cannot enter unrecoverable states.</p>
 <h3 id="performance-benchmarking">Performance Benchmarking</h3>
-<p>Computational complexity is evaluated not just theoretically, but
-empirically via <a
-href="https://github.com/docxology/template/blob/main/infrastructure/scientific/benchmarking.py"><code>infrastructure.scientific.benchmarking.benchmark_function</code></a>.
-This module captures high-resolution execution timings and memory
-footprints across dimensionality sweeps, guaranteeing that the <span
-class="math inline">\(O(n)\)</span> space-time complexity predictions
-hold true on the host architecture.</p>
+<p>The analysis exercises <a
+href="https://github.com/docxology/template/blob/main/infrastructure/scientific/benchmarking.py"><code>infrastructure.scientific.benchmarking.benchmark_function</code></a>
+as a runtime diagnostic. Host-dependent timing and memory observations
+are logged but excluded from tracked evidence. The canonical report
+records fixed inputs and exact objective values, while the dimensional
+figure reports deterministic convergence iterations and the proxy <span
+class="math inline">\(d \times \text{iterations}\)</span>; neither
+surface claims that one host run proves an asymptotic bound.</p>
 <h2 id="convergence-analysis">Convergence Analysis</h2>
 <p>For quadratic functions <span class="math inline">\(f(x) =
 \frac{1}{2}x^T A x - b^T x\)</span> where <span
@@ -329,11 +345,14 @@ to treating the project as build-green.</li>
 <h3 id="stopping-rule-and-reporting">Stopping rule and reporting</h3>
 <p><code>gradient_descent()</code> terminates when <span
 class="math inline">\(\|\nabla f(x_k)\|\)</span> falls below
-<code>experiment.tolerance</code> or when <span
+<code>experiment.tolerance</code>, when <span
 class="math inline">\(k\)</span> reaches
-<code>experiment.max_iterations</code>. The boolean
-<code>converged</code> in exported CSV rows distinguishes these
-outcomes. Downstream,
+<code>experiment.max_iterations</code>, or when an objective, gradient,
+or update becomes non-finite. The boolean <code>converged</code> plus
+<code>termination_reason</code> in exported CSV rows distinguish these
+outcomes. A non-finite candidate is rejected before it enters
+<code>objective_history</code>, preserving the last finite state for
+reproducible reporting. Downstream,
 <code>scripts/z_generate_manuscript_variables.py</code> aggregates the
 CSV into <code>RESULT_*</code> placeholders so tables and prose cannot
 drift from the last analysis run.</p>
