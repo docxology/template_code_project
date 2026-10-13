@@ -8,7 +8,7 @@ This section presents the experimental results from the gradient descent optimiz
 
 [@fig:convergence] illustrates the convergence behavior of gradient descent for different step sizes, starting from the initial point $x_0 = 0$. The algorithm iteratively updates the solution using the rule $x_{k+1} = x_k - \alpha \nabla f(x_k)$.
 
-![Objective value $f(x_k)=\tfrac{1}{2}x_k^2 - x_k$ versus iteration $k$ for gradient descent at six step sizes (legend colours follow the agency taxonomy in [@sec:methodology]: blue = conservative, green = near-optimal, orange = aggressive, red = divergent). Trajectories are produced by `simulate_trajectory()` in `src/optimizer.py`, which calls the same `gradient_descent()` used in [@tbl:opt_results]; the upper bound on the y-axis clips the divergent $\alpha={{CONFIG_MAX_STEP_SIZE}}$ curve so that stable trajectories remain visible. Dashed grey reference line marks the analytic optimum $f(x^\ast)={{RESULT_OPTIMUM_F}}$. Fastest configuration in this experiment: $\alpha={{RESULT_BEST_STEP_SIZE}}$ converges in {{RESULT_MIN_ITERATIONS}} iteration(s).](../output/figures/convergence_plot.png){#fig:convergence}
+![Objective value $f(x_k)=\tfrac{1}{2}x_k^2 - x_k$ versus iteration $k$ for gradient descent at six step sizes (legend colours follow the agency taxonomy in [@sec:methodology]: blue = conservative, green = near-optimal, orange = aggressive, red = divergent). Trajectories are produced by `simulate_trajectory()` in `src/template_code_project/core/optimizer.py`, which calls the same `gradient_descent()` used in [@tbl:opt_results]; the upper bound on the y-axis clips the divergent $\alpha={{CONFIG_MAX_STEP_SIZE}}$ curve so that stable trajectories remain visible. Dashed grey reference line marks the analytic optimum $f(x^\ast)={{RESULT_OPTIMUM_F}}$. Fastest configuration in this experiment: $\alpha={{RESULT_BEST_STEP_SIZE}}$ converges in {{RESULT_MIN_ITERATIONS}} iteration(s).](../output/figures/convergence_plot.png){#fig:convergence}
 
 **Key observations from [@fig:convergence]:**
 
@@ -98,7 +98,7 @@ The results show a clear trade-off between step size and convergence speed:
 - Target solution: $x = {{RESULT_OPTIMUM_X}}$ (relative error $< 10^{-4}$ for converged settings)
 - Target objective: $f(x) = {{RESULT_OPTIMUM_F}}$ (absolute error $< {{CONFIG_CONVERGENCE_TOL}}$ for converged settings)
 
-Divergent step sizes ($\alpha \geq 2$) confirm the theoretical instability boundary, demonstrating that gradient descent with fixed step size requires $\alpha < 2/\lambda_{\max}$ for convergence on quadratic objectives.
+For a positive-definite quadratic, contraction requires $0 < \alpha < 2/\lambda_{\max}$. At the unit-Hessian boundary $\alpha=2$, the error alternates without contracting; for $\alpha>2$, it grows when the initial point is not already the optimum. The configured divergent runs therefore illustrate the instability region rather than uniform convergence.
 
 ## Algorithm Characteristics
 
@@ -139,7 +139,7 @@ The algorithm demonstrates efficient performance for small-scale optimization pr
 
 [@fig:stability] maps the optimizer's accuracy across a grid of {{CONFIG_NUM_STABILITY_STARTS}} starting points ($x_0 \in [-50, 50]$) and {{CONFIG_NUM_STABILITY_STEPS}} step sizes ($\alpha \in [{{CONFIG_STABILITY_MIN_STEP}}, {{CONFIG_STABILITY_MAX_STEP}}]$), directly exercising `gradient_descent()`, `quadratic_function()`, and `compute_gradient()` across the parameter space.
 
-![Numerical stability heatmap from `generate_stability_visualization()`. Each cell shows $\log_{10}|f(x)-f(x^\ast)|$ at termination for one (starting point $x_0$, step size $\alpha$) combination, evaluated by `gradient_descent()` over the {{CONFIG_NUM_STABILITY_STARTS}}-by-{{CONFIG_NUM_STABILITY_STEPS}} grid ({{CONFIG_STABILITY_CELLS}} cells). The leftmost column ($\alpha={{CONFIG_STABILITY_MIN_STEP}}$, conservative) reaches only $10^{-6}$ to $10^{-9}$ within the iteration cap, while every other column saturates at machine precision ($10^{-16}$) regardless of how far $x_0$ starts from the optimum (range $[-50, 50]$). The right panel summarises this uniformity as the aggregate stability score of {{STABILITY_SCORE}}/1.00 returned by `infrastructure.scientific.stability.check_numerical_stability()`, which exercises the same objective with extreme inputs (NaN, $\pm\infty$, $\pm 10^{10}$).](../output/figures/stability_analysis.png){#fig:stability}
+![Numerical stability heatmap from `generate_stability_visualization()`. Each cell shows $\log_{10}|f(x)-f(x^\ast)|$ at termination for one (starting point $x_0$, step size $\alpha$) combination, evaluated by `gradient_descent()` over the {{CONFIG_NUM_STABILITY_STARTS}}-by-{{CONFIG_NUM_STABILITY_STEPS}} grid ({{CONFIG_STABILITY_CELLS}} cells). The leftmost column ($\alpha={{CONFIG_STABILITY_MIN_STEP}}$, conservative) reaches only $10^{-6}$ to $10^{-9}$ within the iteration cap, while every other column saturates at machine precision ($10^{-16}$) regardless of how far $x_0$ starts from the optimum (range $[-50, 50]$). The right panel reports the separate numerical-stability score of {{STABILITY_SCORE}}/1.00 from `infrastructure.scientific.stability.check_numerical_stability()`: it evaluates the scalar quadratic objective at the first four configured starting points and scores finite values for magnitude and near-underflow. This objective-evaluation check is distinct from the heatmap's gradient-descent sweep.](../output/figures/stability_analysis.png){#fig:stability}
 
 ### Performance Metrics Summary
 
@@ -163,10 +163,10 @@ The implementation was validated through the comprehensive `tests/` suite:
 - **Infrastructure tests** covering all underlying mechanisms across `infrastructure.reporting`, `infrastructure.validation`, and `infrastructure.rendering`.
 - **Numerical accuracy** checks verified systematically using PyTest.
 
-All tests pass with coverage exceeding the 90% threshold, ensuring implementation correctness across core logic, convergence detection, and logging pathways without the use of mocks.
+Passing the declared suite and its 90% coverage floor provides evidence for the tested core logic, convergence detection, and logging pathways. It does not prove correctness for every input or replace scientific validation.
 
 ## Discussion
 
-The experimental results validate the gradient descent implementation and confirm the theoretical convergence predictions from [@sec:methodology]. The monotonic relationship between step size and iteration count ([@tbl:opt_results]) aligns with the convergence factor analysis in [@eq:convergence_factor], while the uniform solution accuracy across all step sizes demonstrates the robustness of the convergence criterion $\|\nabla f(x)\| < \epsilon$. The automated analysis pipeline successfully generated six publication-quality visualizations and structured numerical outputs, validating the template's end-to-end research workflow from algorithmic implementation through automated infrastructure-driven reporting and manuscript integration.
+The configured results distinguish convergence, iteration-cap termination, and non-finite updates. Iteration counts are not monotonic in step size: the unit-Hessian contraction factor $\rho(\alpha)=|1-\alpha|$ decreases toward $\alpha=1$ and increases afterward. Accuracy claims apply to converged rows; capped and unstable runs must retain their termination status. The generated table and figures document this finite sweep, not all possible objectives or parameter choices. The analysis pipeline integrates those results into manuscript outputs through the declared configuration and variable injection.
 
-*As a meta-architectural note: the perfect embedding of these outputs into this document, including all dynamic references (e.g., [@fig:stability]), confirms the absolute reliability of the `infrastructure/rendering/pdf_renderer.py` module handling the Pandoc conversion.*
+Successful generation and reference resolution establish this artifact path for the tested candidate; they do not establish absolute renderer reliability or replace visual inspection of its output.

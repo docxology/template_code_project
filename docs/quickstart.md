@@ -24,7 +24,8 @@ uv run python --version
 
 ## Run the Test Suite
 
-Validate the environment and check that the project test suite passes with the ≥90% coverage gate:
+Validate the environment and check that the project test suite passes with the ≥90% coverage gate.
+Falling below that floor fails the gate outright (`--cov-fail-under` enforces it), and zero-collected suites fail too rather than counting as a pass.
 
 ```bash
 uv run pytest projects/templates/template_code_project/tests/ -v --tb=short
@@ -67,7 +68,7 @@ Final PDF: `projects/templates/template_code_project/output/pdf/template_code_pr
 ## Common Next Steps
 
 - **Change step sizes**: edit `projects/templates/template_code_project/manuscript/config.yaml` → `experiment.step_sizes`, then re-run steps 2–4.
-- **Add a new algorithm**: extend `src/optimizer.py`, add tests in `tests/test_optimizer.py`, and call it from the analysis script (see `docs/architecture.md`).
+- **Add a new algorithm**: extend `src/template_code_project/core/optimizer.py`, add tests in `tests/core/test_optimizer.py`, and call it from the analysis script (see `docs/architecture.md`).
 - **Modify the manuscript**: edit markdown files under `projects/templates/template_code_project/manuscript/`, then hydrate variables and re-render (steps 3–4).
 
 ## Getting Help

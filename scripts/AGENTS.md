@@ -10,7 +10,11 @@ The `scripts/` directory contains **Thin Orchestrators**. In the context of the 
 - **Integration examples**: Demonstrates how to use `src/` modules securely in research workflows.
 - **Automated figure generation**: Scripts generate publication-ready figures via `infrastructure.rendering`.
 - **Data export**: Structured data output for deterministic tracking.
-- **Alphabetical ordering hints (`y_*`, `z_*`)**: scripts whose filenames start with a letter prefix run **after** any plainly-named script (alphabetical order). `z_generate_manuscript_variables.py` consumes outputs from `optimization_analysis.py` (figures, data, reports) and emits `{{TOKEN}}` substitutions — so it must run last. The alphabetical prefix is a human-readable hint for manual invocation; the canonical pipeline (`scripts/runner/execute_pipeline.py`) enforces ordering via stage definitions, not filename. A forker introducing a script that should run between analysis and variable-hydration should name it `y_…` or rely on the pipeline stage list.
+- **Declared analysis order**: `manuscript/config.yaml` selects optimization,
+  benchmark, dashboard, API documentation, then manuscript variables.
+  `z_generate_manuscript_variables.py` consumes the fresh optimization
+  artifacts and runs last. Connector and provenance utilities are outside
+  this allowlist and require an explicit invocation.
 - **`z_generate_manuscript_variables.py` strict mode**: default invocation calls `generate_variables(..., require_analysis_outputs=True)` and fails when `output/data/optimization_results.csv` is absent. Use `--allow-draft` for early manuscript drafts that intentionally use `"N/A"` fallbacks.
 
 ## Directory Structure
@@ -26,7 +30,6 @@ flowchart LR
     SC --> BMS[04_benchmark_stage.py<br/>infrastructure.benchmark rubric demo]
     SC --> CSR[08_connector_search.py<br/>Connector search stage · opt-in science]
     SC --> PRR[09_provenance_record.py<br/>Provenance DAG record · opt-in]
-    SC --> RWF[10_research_workflow.py<br/>Research workflow dispatch · opt-in]
     SC --> INIT[__init__.py<br/>Package marker]
     SC --> DOCS[AGENTS.md · README.md · CONVENTIONS.md]
 
@@ -102,24 +105,24 @@ Scripts are tested through the project test suite:
 uv run pytest ../tests/ -v
 
 # Run specific analysis tests
-uv run pytest ../tests/test_analysis_integration.py -k "TestStabilityAnalysis or TestPerformanceBenchmarking" -v
+uv run pytest ../tests/analysis/test_analysis_integration.py -k "TestStabilityAnalysis or TestPerformanceBenchmarking" -v
 
 # Auxiliary script smoke (non-gated AESTHETIC scripts)
-uv run pytest ../tests/test_scripts_smoke.py -v
+uv run pytest ../tests/analysis/test_scripts_smoke.py -v
 ```
 
-**Auxiliary smoke coverage:** [`tests/test_scripts_smoke.py`](../tests/test_scripts_smoke.py) subprocess-invokes `generate_api_docs.py` (expects exit 0 and `output/docs/api_reference.md`) and `00_preflight.py` (accepts exit 0 or 1 when the local Puppeteer cache is absent; asserts actionable preflight diagnostics). Neither script is pipeline-required.
+**Auxiliary smoke coverage:** [`tests/analysis/test_scripts_smoke.py`](../tests/analysis/test_scripts_smoke.py) subprocess-invokes `generate_api_docs.py` (expects exit 0 and `output/docs/api_reference.md`) and `00_preflight.py` (accepts exit 0 or 1 when the local Puppeteer cache is absent; asserts actionable preflight diagnostics). Neither script is pipeline-required.
 
 ## API Reference
 
 ### generate_api_docs.py
 
-Thin wrapper (~35 lines) delegating to [`src/documentation.py`](../src/documentation.py):
+Thin wrapper (~35 lines) delegating to [`src/template_code_project/core/documentation.py`](../src/template_code_project/core/documentation.py):
 
 - `build_api_reference_markdown()` — static API reference template
 - `run_api_doc_generation(project_root)` — writes `output/docs/api_reference.md` and optional glossary index
 
-Unit tests: [`tests/test_documentation.py`](../tests/test_documentation.py). Subprocess smoke: [`tests/test_scripts_smoke.py`](../tests/test_scripts_smoke.py).
+Unit tests: [`tests/core/test_documentation.py`](../tests/core/test_documentation.py). Subprocess smoke: [`tests/analysis/test_scripts_smoke.py`](../tests/analysis/test_scripts_smoke.py).
 
 ### optimization_analysis.py
 
@@ -127,16 +130,16 @@ Thin wrapper (~65 lines) — re-exports and `main()` only. **All API signatures 
 
 | Concern | Module |
 | --- | --- |
-| Convergence experiments, stability, benchmarking | [`src/analysis/`](../src/analysis/) |
-| Matplotlib figures | [`src/figures/`](../src/figures/) |
-| Core optimizer | [`src/optimizer.py`](../src/optimizer.py) |
-| Dashboard HTML | [`src/dashboard.py`](../src/dashboard.py) via `build_dashboard.py` |
+| Convergence experiments, stability, benchmarking | [`src/template_code_project/analysis/`](../src/template_code_project/analysis/) |
+| Matplotlib figures | [`src/template_code_project/figures/`](../src/template_code_project/figures/) |
+| Core optimizer | [`src/template_code_project/core/optimizer.py`](../src/template_code_project/core/optimizer.py) |
+| Dashboard HTML | [`src/template_code_project/dashboard/dashboard.py`](../src/template_code_project/dashboard/dashboard.py) via `build_dashboard.py` |
 
 Run: `uv run python scripts/optimization_analysis.py` from the project root.
 
 ### build_dashboard.py
 
-Thin wrapper → [`src/dashboard.py`](../src/dashboard.py). See [`../src/AGENTS.md`](../src/AGENTS.md).
+Thin wrapper → [`src/template_code_project/dashboard/dashboard.py`](../src/template_code_project/dashboard/dashboard.py). See [`../src/AGENTS.md`](../src/AGENTS.md).
 
 ### 00_preflight.py
 
@@ -145,33 +148,27 @@ Thin wrapper → [`infrastructure.rendering.preflight`](../../../../infrastructu
 ### 04_benchmark_stage.py
 
 Thin orchestrator for the `infrastructure.benchmark` rubric demo backed by
-`src/benchmark_support.py`. Writes `output/data/benchmark_report.json` and a
+`src/template_code_project/core/benchmark_support.py`. Writes `output/reports/benchmark_report.json` and a
 deterministic timing figure (`output/figures/benchmark_timings.png`) with
 wall-clock timing logged as a runtime diagnostic only. See
-[`src/benchmark_support.py`](../src/benchmark_support.py).
+[`src/template_code_project/core/benchmark_support.py`](../src/template_code_project/core/benchmark_support.py).
 
 ### 08_connector_search.py
 
-Opt-in `science` pipeline stage (not in default runs): executes the
-`Connector Search` step declared in `infrastructure/core/pipeline/pipeline.yaml`
-for this exemplar when a connector is configured. Thin wrapper → infrastructure
-connector machinery; skipped cleanly when not configured.
+Explicit connector utility, outside the analysis allowlist. The canonical
+`Connector Search` stage is the repository's
+`scripts/pipeline/stage_08_connector_search.py` orchestrator, selected separately
+from core analysis; it requires configured connectors or a reason receipt.
 
 ### 09_provenance_record.py
 
-Opt-in `provenance` pipeline stage: records a provenance-DAG entry after the
-Connector Search stage. Thin wrapper → `infrastructure.provenance`; skipped
-cleanly when provenance recording is not configured.
-
-### 10_research_workflow.py
-
-Opt-in research-workflow dispatcher for LLM-backed research prompts
-(`infrastructure.research`). Runs only when explicitly invoked; not part of the
-default core DAG.
+Explicit provenance utility, outside the analysis allowlist. The canonical
+repository `scripts/pipeline/stage_09_provenance_record.py` orchestrator binds
+the configured stage's artifacts and reports missing configuration explicitly.
 
 ### z_generate_manuscript_variables.py
 
-Thin wrapper → [`src/manuscript_variables.py`](../src/manuscript_variables.py).
+Thin wrapper → [`src/template_code_project/core/manuscript_variables.py`](../src/template_code_project/core/manuscript_variables.py).
 
 ## Infrastructure Integration
 
@@ -281,4 +278,4 @@ logging.basicConfig(level=logging.DEBUG)
 ## See Also
 
 - [README.md](README.md) - Quick reference
-- [../src/optimizer.py](../src/optimizer.py) - Core algorithms used by scripts
+- [../src/template_code_project/core/optimizer.py](../src/template_code_project/core/optimizer.py) - Core algorithms used by scripts

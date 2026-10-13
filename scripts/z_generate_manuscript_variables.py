@@ -6,7 +6,7 @@ Reads experiment config and analysis outputs, writes
 ``{{TOKEN}}`` markers in manuscript sections into
 ``output/manuscript/`` for PDF rendering.
 
-All computation lives in ``src/manuscript_variables``;
+All computation lives in ``src/template_code_project/core/manuscript_variables``;
 all injection lives in
 ``infrastructure.rendering.manuscript_injection``.
 
@@ -22,8 +22,20 @@ import sys
 from pathlib import Path
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(_PROJECT_ROOT))
-sys.path.insert(0, str(_PROJECT_ROOT.parents[2]))
+sys.path.insert(0, str(_PROJECT_ROOT / "src"))
+
+
+def _template_repo_root(project_root: Path) -> Path | None:
+    """Return the template repository root when this project is inside one."""
+    for parent in project_root.parents:
+        if (parent / "infrastructure").is_dir() and (parent / "pyproject.toml").is_file():
+            return parent
+    return None
+
+
+_REPO_ROOT = _template_repo_root(_PROJECT_ROOT)
+if _REPO_ROOT is not None and str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 
 def main() -> int:
@@ -37,7 +49,7 @@ def main() -> int:
     args = parser.parse_args()
 
     from infrastructure.rendering.manuscript_injection import write_resolved_manuscript_tree
-    from src.manuscript_variables import generate_variables, save_variables
+    from template_code_project.core.manuscript_variables import generate_variables, save_variables
 
     variables = generate_variables(
         _PROJECT_ROOT,
