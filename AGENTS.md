@@ -329,11 +329,11 @@ These issues were discovered during development and are documented here for futu
 
 > **See also**: [New Project Setup Guide](../../../docs/guides/new-project-setup.md) for the full checklist.
 
-This project complies with the template development standards in **[`docs/rules/`](../../../docs/rules/)** and the root **[`.cursorrules`](../../../.cursorrules)** file.
+This project complies with the template development standards in the root **[`AGENTS.md`](AGENTS.md)** and **[`.agents/AGENTS.md`](.agents/AGENTS.md)**, plus the shared rules those files link to.
 
 ### ✅ **Testing Standards Compliance**
 
-- **90%+ coverage**: live test count and achieved coverage tracked in [`COUNTS.md`](../../../docs/_generated/COUNTS.md); the current suite runs well above the 90% gate
+- **90%+ coverage**: `--cov-fail-under=90` in `pyproject.toml` is the authoritative gate; the current suite runs well above it
 - **Real data only**: All tests use computations, no mocks
 - **Full integration**: Tests cover algorithm convergence, stability analysis, and performance benchmarking
 - **Deterministic results**: Tests use fixed inputs; any use of random draws should be justified or seeded (see `docs/agent_instructions.md`)

@@ -237,11 +237,13 @@ graph TD
     F --> T[JSON Reports]
 ```
 
-## .cursorrules Compliance
+## Development and agent guidance
 
-✅ **Fully compliant** with template development standards:
+Shared instructions live in [root `AGENTS.md`](AGENTS.md) and
+[`.agents/AGENTS.md`](.agents/AGENTS.md). The following development
+standards apply:
 
-- **Testing**: `src/` coverage is gated at 90%; live test count + achieved coverage tracked in [`../../docs/_generated/COUNTS.md`](../../../docs/_generated/COUNTS.md)
+- **Testing**: `src/` coverage is gated at 90% (suite contract in [`docs/testing_philosophy.md`](docs/testing_philosophy.md))
 - **Documentation**: AGENTS.md + README.md in each directory
 - **Type Safety**: Full type hints on all public APIs
 - **Code Quality**: Ruff format/check (CI parity), descriptive naming, proper imports

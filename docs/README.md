@@ -75,7 +75,7 @@ cd "projects/working/$NEW"
 # 4. Replace manuscript/*.md with your narrative; keep {{TOKEN}} + figure-label conventions
 # 5. Point scripts/ at your src/ functions (thin orchestrators only)
 uv run pytest "projects/working/$NEW/tests/" --cov="projects/working/$NEW/src" --cov-fail-under=90
-uv run python scripts/runner/execute_pipeline.py --project "working/$NEW" --core-only
+uv run python scripts/runner/execute_pipeline.py --project "working/$NEW" --mode core
 ```
 
 Then the project is discovered automatically (`discover_projects()`); the
