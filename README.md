@@ -1,6 +1,6 @@
 # Code Project — Optimization Research Exemplar
 
-Research project demonstrating optimization algorithms with automated figure generation and publication-quality output. Exemplar roster: [`projects/AGENTS.md`](../../AGENTS.md#permanent-canonical-exemplars).
+Research project demonstrating optimization algorithms with automated figure generation and publication-quality output. Exemplar roster: [`projects/AGENTS.md`](https://github.com/docxology/template/blob/main/projects/AGENTS.md#permanent-canonical-exemplars).
 
 ## When to use this template
 
@@ -10,9 +10,9 @@ publication-quality figures, and a manuscript that reports the computed
 results. It demonstrates the thin-orchestrator pattern
 (scripts coordinate; `src/` implements; tests enforce ≥90% coverage with no
 mocks). If your project is primarily prose review, layout, or book-length
-structure, see [`template_prose_project`](../template_prose_project/),
-[`template_newspaper`](../template_newspaper/), or
-[`template_textbook`](../template_textbook/) instead.
+structure, see [`template_prose_project`](https://github.com/docxology/template/blob/main/projects/templates/template_prose_project),
+[`template_newspaper`](https://github.com/docxology/template/blob/main/projects/templates/template_newspaper), or
+[`template_textbook`](https://github.com/docxology/template/blob/main/projects/templates/template_textbook) instead.
 
 ## Publication and rendering
 
@@ -125,7 +125,7 @@ Full end-to-end: `uv run python scripts/runner/execute_pipeline.py --project tem
 
 ## Dependencies
 
-Run `uv sync` at the **repository root**; that environment is what CI and `./run.sh` use. [`pyproject.toml`](pyproject.toml) in this directory configures pytest/coverage for `projects/templates/template_code_project/tests/` and records the same scientific stack for isolated runs. Root [`pyproject.toml`](../../../pyproject.toml) has `[tool.uv.workspace]` with `members = []`, so this folder is not installed as a separate workspace package.
+Run `uv sync` at the **repository root**; that environment is what CI and `./run.sh` use. [`pyproject.toml`](pyproject.toml) in this directory configures pytest/coverage for `projects/templates/template_code_project/tests/` and records the same scientific stack for isolated runs. Root [`pyproject.toml`](https://github.com/docxology/template/blob/main/pyproject.toml) has `[tool.uv.workspace]` with `members = []`, so this folder is not installed as a separate workspace package.
 
 ## Agentic research overlays
 
@@ -255,7 +255,7 @@ standards apply:
 When editing manuscript markdown:
 
 - [`manuscript/SYNTAX.md`](manuscript/SYNTAX.md) — citation, equation, figure, table, and section conventions specific to this project (label registries for all 6 figures and 8 equations).
-- [`../../docs/guides/manuscript-semantics.md`](../../../docs/guides/manuscript-semantics.md) — repository-wide manuscript semantics.
+- [`../../docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/main/docs/guides/manuscript-semantics.md) — repository-wide manuscript semantics.
 - [`manuscript/AGENTS.md`](manuscript/AGENTS.md) — `{{TOKEN}}` substitution protocol and section-modification workflow.
 
 ## More Information
@@ -274,5 +274,5 @@ See [AGENTS.md](AGENTS.md) for technical documentation.
 
 Default CI builds this template's wheel and runs focused behavioral tests. Further
 hardening can add optimization stability across seeds and larger convergence sweeps. The complete suites and native/provider acceptance remain opt-in;
-see [functional CI and hardening](../../../docs/development/ci.md) for commands
+see [functional CI and hardening](https://github.com/docxology/template/blob/main/docs/development/ci.md) for commands
 and the evidence each lane establishes.
