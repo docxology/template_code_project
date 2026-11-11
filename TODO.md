@@ -81,3 +81,7 @@ No active rows are currently scoped at this size.
 
 Rows remain active until the acceptance command and negative control pass in the same source revision.
 A blocked row is a deliberate boundary, not a skipped success.
+
+## Workflowz review — 2026-11-10
+
+Coverage note: reviewed the supplied project guidance, README, existing TODO, package/runtime metadata, logging implementation, and visible vendored Kmyth build excerpts. No concrete improvement survived the packet’s evidence threshold: no project source excerpts were supplied, and the visible build excerpts lacked enough context to verify suspected defects. Re-review on a concrete failure or when relevant source/build changes or fuller excerpts are available.
