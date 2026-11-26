@@ -8,8 +8,8 @@ It demonstrates the complete research pipeline from algorithm implementation thr
 
 This project is explicitly designed to showcase the repository's three foundational pillars:
 
-1. **`infrastructure/` Layer**: The code delegates tracking, performance benchmarking, stability validation, and PDF rendering to the shared infrastructure packages at the repository root. Current package counts live in [`docs/_generated/COUNTS.md`](../../../../docs/_generated/COUNTS.md).
-2. **`tests/` Integrity**: A zero-mock suite ([`projects/templates/template_code_project/tests/`](../tests/)) with **≥90%** coverage on `projects/templates/template_code_project/src/`. Live test count and measured coverage: [`docs/_generated/COUNTS.md`](../../../../docs/_generated/COUNTS.md).
+1. **`infrastructure/` Layer**: The code delegates tracking, performance benchmarking, stability validation, and PDF rendering to the shared infrastructure packages at the repository root. Current package counts live in [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md).
+2. **`tests/` Integrity**: A zero-mock suite ([`tests/`](../../tests/)) with **≥90%** coverage on `src/`. Live test count and measured coverage: [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md).
 3. **`docs/` Orchestration**: Project documentation under `projects/templates/template_code_project/docs/` records the operational patterns and is checked by the repository documentation lint gates.
 
 ## Manuscript Structure
@@ -34,7 +34,7 @@ graph TD
 
     subgraph "Project Space (`projects/templates/template_code_project/`)"
         Script["scripts/optimization_analysis.py"]:::project
-        Manuscript["manuscript/*.md"]:::project
+        Manuscript["docs/manuscript/*.md"]:::project
     end
 
     subgraph "Template Ecosystem"
@@ -59,17 +59,22 @@ graph TD
     Rendering -->|Produces| PDF["output/templates/template_code_project/pdf/template_code_project_combined.pdf"]:::project
 ```
 
-## Quick Start
+## Render and validate
 
-Experience the automated pipeline directly:
+Follow the [quick start](../quickstart.md) to generate the figures and
+results, hydrate the numbered source sections, and invoke Stages 03 and 04
+from the pinned template checkout.
+
+## Bibliography
+
+Edit [`references.bib`](references.bib) to add sources. Markdown citations use
+`[@key]`. Pandoc resolves them against the bibliography when rendering the
+publication. Validate the bibliography from the project root with the
+template environment set up in the quick start.
 
 ```bash
-# From repository root
-uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
-
-uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
-
-open output/templates/template_code_project/pdf/template_code_project_combined.pdf
+uv run python -m infrastructure.reference.citation.cli validate \
+  docs/manuscript/references.bib --strict
 ```
 
 ## AI Agent Directives
@@ -79,5 +84,5 @@ If you are an AI agent operating in this repository, you **MUST** read [`AGENTS.
 ## See also
 
 - [`SYNTAX.md`](SYNTAX.md) — Pandoc citation / cross-reference conventions for this manuscript.
-- [`../../../docs/guides/manuscript-semantics.md`](../../../../docs/guides/manuscript-semantics.md) — Repository-wide manuscript semantics.
-- [`../../../AGENTS.md`](../../../AGENTS.md#permanent-canonical-exemplars) — public exemplar roster.
+- [`../../../docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/manuscript-semantics.md) — Repository-wide manuscript semantics.
+- [`../../../AGENTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/AGENTS.md#permanent-canonical-exemplars) — public exemplar roster.

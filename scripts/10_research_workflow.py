@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Research workflow dispatch stage.
 
-Reads the ``research_workflow:`` block from ``manuscript/config.yaml`` and,
+Reads optional project-root ``research_workflow.yaml`` and,
 when enabled, dispatches the 7-stage research workflow using the configured
 stage overrides.
 

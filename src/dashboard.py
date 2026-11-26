@@ -16,14 +16,14 @@ import numpy as np
 from .dashboard_panels import REPO_ROOT, build_dashboard, to_dashboard_invariant
 from .dashboard_payload import compute_payload, load_yaml_defaults, to_diagonal_A
 from .experiment_config import load_experiment_config
-from .project_paths import _DEFAULT_ROOT as PROJECT_ROOT, project_output_dirs
+from .project_paths import _DEFAULT_ROOT as PROJECT_ROOT, manuscript_config_path, project_output_dirs
 
 _OUTPUT_DIRS = project_output_dirs(PROJECT_ROOT)
 OUTPUT = _OUTPUT_DIRS["output"]
 WEB_DIR = _OUTPUT_DIRS["web"]
 DATA_DIR = _OUTPUT_DIRS["data"]
 REP_DIR = _OUTPUT_DIRS["reports"]
-CFG_DEFAULT = PROJECT_ROOT / "manuscript" / "config.yaml"
+CFG_DEFAULT = manuscript_config_path(PROJECT_ROOT)
 
 # Backward-compatible private aliases used by scripts/tests.
 _load_yaml_defaults = load_yaml_defaults

@@ -26,9 +26,9 @@ If you ever feel the urge to mock something in a test for `src/`, treat it as a 
 
 Configuration: `projects/templates/template_code_project/pyproject.toml` (`fail_under = 90`, matching the root pipeline gate)
 
-Conftest: `projects/templates/template_code_project/tests/conftest.py` (sets `MPLBACKEND=Agg`, adds `src/` to `sys.path`)
+Conftest: `tests/conftest.py` (sets `MPLBACKEND=Agg`, adds `src/` to `sys.path`)
 
-Live test count and coverage percentage: [`docs/_generated/COUNTS.md`](../../../../docs/_generated/COUNTS.md) (or `uv run pytest tests/ --collect-only -q` from the project directory).
+Live test count and coverage percentage: [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md) (or `uv run pytest tests/ --collect-only -q` from the project directory).
 
 ## Test Class Inventory (core math — `test_optimizer.py`)
 

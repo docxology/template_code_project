@@ -4,9 +4,9 @@ type: "manuscript_guide"
 version: "2.5.2"
 ---
 
-# Manuscript (`projects/templates/template_code_project/manuscript/`)
+# Manuscript (`docs/manuscript/`)
 
-Repository-wide agent rules for this exemplar live in [`../docs/agent_instructions.md`](../docs/agent_instructions.md). This file covers **manuscript-specific** editing: file roles, `{{VARIABLE}}` token protocol, figure protocol, and the section modification workflow.
+Repository-wide agent rules for this exemplar live in [`../docs/agent_instructions.md`](../agent_instructions.md). This file covers **manuscript-specific** editing: file roles, `{{VARIABLE}}` token protocol, figure protocol, and the section modification workflow.
 
 ## File Inventory
 
@@ -36,23 +36,23 @@ Numeric values that come from analysis outputs **must** use `{{VARIABLE_NAME}}` 
 1. `scripts/z_generate_manuscript_variables.py` calls `src/template_code_project/core/manuscript_variables.py::generate_variables()` to compute all token values
 2. `generate_variables()` reads experiment parameters via `src/template_code_project/core/experiment_config.py::load_experiment_config()` (same loader as analysis, figures, and dashboard)
 3. The script writes the full `{TOKEN: value}` mapping to `output/data/manuscript_variables.json`
-4. It calls `infrastructure.rendering.manuscript_injection.write_resolved_manuscript_tree()` which copies each `manuscript/*.md` template to `output/manuscript/*.md`, substituting every `{{TOKEN}}` with its resolved value
+4. It calls `infrastructure.rendering.manuscript_injection.write_resolved_manuscript_tree()` which copies each `docs/manuscript/*.md` template to `output/manuscript/*.md`, substituting every `{{TOKEN}}` with its resolved value
 5. `scripts/pipeline/stage_03_render.py` renders the **substituted** copies (from `output/manuscript/`), not the originals
 
 **Adding a new token**:
 1. Add a key/value pair to the `variables` dict in `src/template_code_project/core/manuscript_variables.py::generate_variables()`
 2. Add a corresponding assertion in `tests/core/test_manuscript_variables.py` (the live cross-reference test `test_all_manuscript_tokens_are_generated` will fail automatically if a manuscript token is missing)
-3. Verify: `python -c "import json; d=json.load(open('projects/templates/template_code_project/output/data/manuscript_variables.json')); print(d['MY_TOKEN'])"`
+3. Verify: `python -c "import json; d=json.load(open('output/data/manuscript_variables.json')); print(d['MY_TOKEN'])"`
 4. Reference in a manuscript file as `{{MY_TOKEN}}`
 
 **Detecting unresolved tokens** (run before rendering):
 ```bash
-grep -r "{{" projects/templates/template_code_project/output/manuscript/ 2>/dev/null \
+grep -r "{{" output/manuscript/ 2>/dev/null \
   && echo "UNRESOLVED TOKENS — re-run z_generate_manuscript_variables.py" \
   || echo "All tokens resolved"
 ```
 
-See [`../docs/syntax_guide.md`](../docs/syntax_guide.md) for an illustrative token reference table — it is a subset that may lag behind the code, per that file's own disclaimer. The authoritative source of truth is the return value of `src/template_code_project/core/manuscript_variables.py::generate_variables()`; the live cross-reference test `tests/core/test_manuscript_variables.py::test_all_manuscript_tokens_are_generated` is what actually gates completeness.
+See [`../docs/syntax_guide.md`](../syntax_guide.md) for an illustrative token reference table — it is a subset that may lag behind the code, per that file's own disclaimer. The authoritative source of truth is the return value of `src/template_code_project/core/manuscript_variables.py::generate_variables()`; the live cross-reference test `tests/core/test_manuscript_variables.py::test_all_manuscript_tokens_are_generated` is what actually gates completeness.
 
 ## Figure Protocol
 
@@ -69,13 +69,13 @@ All six figures must be referenced via Pandoc-crossref `[@fig:label]`, never wit
 
 **To add a new figure**:
 1. Add a generator function to `src/template_code_project/figures/` and wire it through `src/template_code_project/analysis/` (script entry: `scripts/optimization_analysis.py`).
-2. In the appropriate manuscript section, add a Pandoc image line (alt, relative path under `../output/figures/`, and `{#fig:…}`) by copying the structure of any figure in `03_results.md` and updating the path to match the file your generator writes.
+2. In the appropriate manuscript section, add a Pandoc image line (alt, relative path under `../../output/figures/`, and `{#fig:…}`) by copying the structure of any figure in `03_results.md` and updating the path to match the file your generator writes.
 3. Reference in prose: `[@fig:new_label]` (parenthetical) or `@fig:new_label` (narrative)
-4. Document in [`../docs/output_inventory.md`](../docs/output_inventory.md) regeneration table
+4. Document in [`../docs/output_inventory.md`](../output_inventory.md) regeneration table
 
 ## Infrastructure Coupling (`scripts/`, not `src/`)
 
-Orchestrators under `projects/templates/template_code_project/scripts/` should use `infrastructure.core.logging.utils.get_logger(__name__)` (same pattern as `optimization_analysis.py`). Scientific checks should go through `infrastructure.scientific` helpers where applicable. `src/template_code_project/core/optimizer.py` must remain infrastructure-free.
+Orchestrators under `scripts/` should use `infrastructure.core.logging.utils.get_logger(__name__)` (same pattern as `optimization_analysis.py`). Scientific checks should go through `infrastructure.scientific` helpers where applicable. `src/template_code_project/core/optimizer.py` must remain infrastructure-free.
 
 ## Section Modification Protocol
 
@@ -85,15 +85,15 @@ Follow these steps in order whenever you change behavior and need to update the 
 2. **Add or extend tests** — pure math in `tests/core/test_optimizer.py`; orchestration and error paths in `tests/analysis/test_analysis_integration.py` and `tests/analysis/test_analysis_coverage.py`.
 3. **Regenerate analysis outputs**:
    ```bash
-   uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
+   uv run python scripts/optimization_analysis.py
    ```
 4. **Hydrate manuscript variables** (substitute `{{VARIABLE}}` tokens):
    ```bash
-   uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+   uv run python scripts/z_generate_manuscript_variables.py
    ```
 5. **Verify all tokens resolved**:
    ```bash
-   grep -r "{{" projects/templates/template_code_project/output/manuscript/ || echo "All resolved"
+   grep -r "{{" output/manuscript/ || echo "All resolved"
    ```
 6. **Render PDF** from the repository root:
    ```bash
@@ -107,22 +107,22 @@ Follow these steps in order whenever you change behavior and need to update the 
 > `chrome-headless-shell` in the Puppeteer cache. Install it once
 > (`npx --yes puppeteer browsers install chrome-headless-shell`) or the
 > **PDF Rendering** stage fails while per-section slides still render. Full
-> detail: [`../docs/rendering_pipeline.md`](../docs/rendering_pipeline.md#prerequisite-mermaid-diagrams-need-chrome-headless-shell).
+> detail: [`../docs/rendering_pipeline.md`](../rendering_pipeline.md#prerequisite-mermaid-diagrams-need-chrome-headless-shell).
 
-Final deliverables appear under `output/templates/template_code_project/` after `scripts/pipeline/stage_05_copy.py` runs (working files remain under `projects/templates/template_code_project/output/` during the run).
+Final deliverables appear under `output/templates/template_code_project/` after `scripts/pipeline/stage_05_copy.py` runs (working files remain under `output/` during the run).
 
 ## RASP Conventions
 
 1. Avoid boilerplate closers such as "In summary" / "In conclusion" at the end of sections unless the section genuinely needs them.
-2. Figures and numbers in `03_results.md` must match what `scripts/optimization_analysis.py` writes (paths under `projects/templates/template_code_project/output/figures/` and related CSV/JSON).
+2. Figures and numbers in `03_results.md` must match what `scripts/optimization_analysis.py` writes (paths under `output/figures/` and related CSV/JSON).
 3. When referencing template code, prefer concrete paths or URLs (e.g. [core utilities in the template repository](https://github.com/docxology/template/tree/main/infrastructure/core)) over vague module dotted paths alone.
 
 ## See also
 
 - [`README.md`](README.md) — Quick orientation
 - [`SYNTAX.md`](SYNTAX.md) — Pandoc syntax reference for this manuscript
-- [`../../../docs/guides/manuscript-semantics.md`](../../../../docs/guides/manuscript-semantics.md) — Repository-wide canonical manuscript semantics shared by the permanent exemplars
-- [`../docs/rendering_pipeline.md`](../docs/rendering_pipeline.md) — Manuscript → PDF flow (4 phases)
-- [`../docs/syntax_guide.md`](../docs/syntax_guide.md) — Complete `{{VARIABLE}}` token reference
-- [`../src/template_code_project/core/manuscript_variables.py`](../src/template_code_project/core/manuscript_variables.py) — Variable computation logic (`generate_variables()`)
-- [`../scripts/z_generate_manuscript_variables.py`](../scripts/z_generate_manuscript_variables.py) — Thin orchestrator that runs the above and writes output files
+- [`../../../docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/manuscript-semantics.md) — Repository-wide canonical manuscript semantics shared by the permanent exemplars
+- [`../docs/rendering_pipeline.md`](../rendering_pipeline.md) — Manuscript → PDF flow (4 phases)
+- [`../docs/syntax_guide.md`](../syntax_guide.md) — Complete `{{VARIABLE}}` token reference
+- [`../src/template_code_project/core/manuscript_variables.py`](../../src/template_code_project/core/manuscript_variables.py) — Variable computation logic (`generate_variables()`)
+- [`../scripts/z_generate_manuscript_variables.py`](../../scripts/z_generate_manuscript_variables.py) — Thin orchestrator that runs the above and writes output files

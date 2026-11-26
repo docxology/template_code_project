@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `src/` directory contains the importable project logic for the research project. The package lives at `src/template_code_project/`, with the mathematical layer (`core/optimizer.py`, `core/invariants.py`) pure and deterministic; generated-output workflows (`analysis/`, `figures/`, `dashboard/`, `core/manuscript_variables.py`, `core/documentation.py`) live in the package so scripts stay thin CLI wrappers. Experiment parameters are loaded once from `manuscript/config.yaml` → `experiment:` via `core/experiment_config.py` and shared by analysis, figures, dashboard, and manuscript variable generation.
+The `src/` directory contains the importable project logic for the research project. The package lives at `src/template_code_project/`, with the mathematical layer (`core/optimizer.py`, `core/invariants.py`) pure and deterministic; generated-output workflows (`analysis/`, `figures/`, `dashboard/`, `core/manuscript_variables.py`, `core/documentation.py`) live in the package so scripts stay thin CLI wrappers. Experiment parameters are loaded once from `docs/manuscript/config.yaml` → `experiment:` via `core/experiment_config.py` and shared by analysis, figures, dashboard, and manuscript variable generation.
 
 ## Key Concepts
 
@@ -193,7 +193,7 @@ uv run pytest ../tests/ --cov=. --cov-report=html
 
 #### ExperimentConfig (frozen dataclass)
 
-Loaded from `manuscript/config.yaml` → `experiment:` by `load_experiment_config(project_root)`.
+Loaded from `docs/manuscript/config.yaml` → `experiment:` by `load_experiment_config(project_root)`.
 Shared by `analysis/`, `figures/`, `core/sweeps.py`, `dashboard/`, and `core/manuscript_variables.py`.
 
 ### core/sweeps.py
@@ -251,7 +251,7 @@ the tracked payload. Orchestration (writing reports/figures) lives in
 
 ```python
 def load_experiment_config(project_root: Path | None = None) -> ExperimentConfig:
-    """Parse ``experiment:`` from ``manuscript/config.yaml`` with typed defaults."""
+    """Parse ``experiment:`` from ``docs/manuscript/config.yaml`` with typed defaults."""
 ```
 
 ### core/manuscript_variables.py

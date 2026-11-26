@@ -1,6 +1,12 @@
 # Rendering Pipeline: Manuscript → PDF
 
-The `manuscript/` directory contains the narrative components of the research. It is compiled into a publication-ready PDF automatically by the template's rendering infrastructure. This document describes every step, what it produces, which scripts run it, and how to troubleshoot failures.
+The [`docs/manuscript/`](manuscript/README.md) directory contains the narrative components of the research. It is compiled into a publication-ready PDF automatically by the template's rendering infrastructure. This document describes every step, what it produces, which scripts run it, and how to troubleshoot failures.
+
+The [quick start](quickstart.md) pins the shared template and sets up the
+standalone environment. Run project scripts in this checkout and the Stage
+03/04 commands in the pinned template checkout. Keep the render project as a real checkout
+beneath its `projects/working/` directory so the supervised hydration step
+can capture its input and output files.
 
 ## Prerequisite: Mermaid diagrams need `chrome-headless-shell`
 
@@ -38,10 +44,10 @@ The pipeline has four steps. Each step must complete before the next begins.
 
 **Command**:
 ```bash
-uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
+uv run python scripts/optimization_analysis.py
 ```
 
-**Inputs**: `src/template_code_project/core/optimizer.py` functions + `manuscript/config.yaml` experiment parameters
+**Inputs**: `src/template_code_project/core/optimizer.py` functions + `docs/manuscript/config.yaml` experiment parameters
 
 **Outputs**:
 
@@ -65,12 +71,12 @@ uv run python projects/templates/template_code_project/scripts/optimization_anal
 
 **Command**:
 ```bash
-uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+uv run python scripts/z_generate_manuscript_variables.py
 ```
 
-**Inputs**: `manuscript/config.yaml` + `output/data/optimization_results.csv` + `output/reports/*.json`
+**Inputs**: `docs/manuscript/config.yaml` + `output/data/optimization_results.csv` + `output/reports/*.json`
 
-**What it does**: Calls `src/template_code_project/core/manuscript_variables.py::generate_variables(..., require_analysis_outputs=True)` (default) to compute all token values, then calls `infrastructure.rendering.manuscript_injection.write_resolved_manuscript_tree()` to write substituted copies of `manuscript/*.md` to `output/manuscript/`. It also writes the full mapping to `output/data/manuscript_variables.json`.
+**What it does**: Calls `src/template_code_project/core/manuscript_variables.py::generate_variables(..., require_analysis_outputs=True)` (default) to compute all token values, then calls `infrastructure.rendering.manuscript_injection.write_resolved_manuscript_tree()` to write substituted copies of `docs/manuscript/*.md` to `output/manuscript/`. It also writes the full mapping to `output/data/manuscript_variables.json`.
 
 **Strict default**: Fails with `FileNotFoundError` when `output/data/optimization_results.csv` is missing. Use `--allow-draft` only for intentional early drafts that may emit `"N/A"` for result-derived tokens.
 
@@ -86,14 +92,14 @@ uv run python projects/templates/template_code_project/scripts/z_generate_manusc
 
 **Command**:
 ```bash
-uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
+uv run python scripts/pipeline/stage_03_render.py --project working/template_code_project
 ```
 
-**Inputs**: `output/manuscript/*.md` (substituted) + `manuscript/config.yaml` + `manuscript/preamble.md` + `manuscript/references.bib`
+**Inputs**: `output/manuscript/*.md` (substituted) + `docs/manuscript/config.yaml` + `docs/manuscript/preamble.md` + `docs/manuscript/references.bib`
 
-When `publication.transmission_bookends.enabled: true`, the combined PDF also includes generated `00_00_transmission_begin.md` and `99_zz_transmission_end.md` (compact metadata, dual-row integrity strip, `transmission_manifest.json`, prior releases capped at three rows on the end page). Verify single-page fit: `uv run python -m infrastructure.publishing.transmission_page_check projects/templates/template_code_project/output/pdf/template_code_project_combined.pdf`. After render, run `uv run python -m infrastructure.orchestration secure --steganography-only --project templates/template_code_project --deterministic` for the hardened `*_steganography.pdf` and `.hashes.json` manifest; the Python `secure` subcommand owns `--deterministic`. See [`docs/guides/publishing-guide.md`](../../../../docs/guides/publishing-guide.md#transmission-bookends-optional).
+When `publication.transmission_bookends.enabled: true`, the combined PDF also includes generated `00_00_transmission_begin.md` and `99_zz_transmission_end.md` (compact metadata, dual-row integrity strip, `transmission_manifest.json`, prior releases capped at three rows on the end page). Verify single-page fit: `uv run python -m infrastructure.publishing.transmission_page_check output/pdf/template_code_project_combined.pdf`. After render, run `uv run python -m infrastructure.orchestration secure --steganography-only --project working/template_code_project --deterministic` for the hardened `*_steganography.pdf` and `.hashes.json` manifest; the Python `secure` subcommand owns `--deterministic`. See [`docs/guides/publishing-guide.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/publishing-guide.md#transmission-bookends-optional).
 
-Zenodo and GitHub uploads use a metadata-driven basename from `publication.deposit_filename` (e.g. `Author_2026_Convergence_b591a0ce.pdf`); the local working file remains `template_code_project_combined.pdf`. See [Deposit upload filename](../../../../docs/guides/publishing-guide.md#deposit-upload-filename).
+Zenodo and GitHub uploads use a metadata-driven basename from `publication.deposit_filename` (e.g. `Author_2026_Convergence_b591a0ce.pdf`); the local working file remains `template_code_project_combined.pdf`. See [Deposit upload filename](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/publishing-guide.md#deposit-upload-filename).
 
 **Infrastructure modules involved**:
 
@@ -102,22 +108,22 @@ Zenodo and GitHub uploads use a metadata-driven basename from `publication.depos
 | `infrastructure/rendering/pdf_renderer.py` | Orchestrates Pandoc → XeLaTeX pipeline |
 | `infrastructure/rendering/_pdf_latex_helpers.py` | LaTeX package validation and preamble injection |
 | `infrastructure/rendering/manuscript_discovery.py` | Discovers and orders manuscript section files |
-| `infrastructure/core/config/loader.py` | Reads `manuscript/config.yaml` for title, authors, metadata |
+| `infrastructure/core/config/loader.py` | Reads `docs/manuscript/config.yaml` for title, authors, metadata |
 
 **Outputs**:
-- `projects/templates/template_code_project/output/pdf/template_code_project_combined.pdf` — working publication PDF
+- `output/pdf/template_code_project_combined.pdf` — working publication PDF
 - `output/templates/template_code_project/pdf/template_code_project_combined.pdf` — copied final publication PDF after Stage 07
-- `projects/templates/template_code_project/output/pdf/_combined_manuscript.*` — LaTeX intermediates (`.tex`, `.aux`, `.log`)
-- `projects/templates/template_code_project/output/slides/` — per-section Beamer slide PDFs (one per manuscript section)
-- `projects/templates/template_code_project/output/web/` — HTML versions of each section
+- `output/pdf/_combined_manuscript.*` — LaTeX intermediates (`.tex`, `.aux`, `.log`)
+- `output/slides/` — per-section Beamer slide PDFs (one per manuscript section)
+- `output/web/` — HTML versions of each section
 
-### Copy deliverables
+### Copy deliverables in the upstream template
 
 **Script**: `scripts/pipeline/stage_05_copy.py` (at repository root)
 
 **Command**:
 ```bash
-uv run python scripts/pipeline/stage_05_copy.py --project templates/template_code_project
+uv run python scripts/pipeline/stage_05_copy.py --project working/template_code_project
 ```
 
 **Output**: Final PDF and figures copied to `output/templates/template_code_project/` at the repository root (used by CI artifact upload and the multi-project executive report).
@@ -145,13 +151,13 @@ uv run python scripts/pipeline/stage_05_copy.py --project templates/template_cod
 **Fix**:
 ```bash
 # Check whether output/data/manuscript_variables.json exists
-ls projects/templates/template_code_project/output/data/manuscript_variables.json
+ls output/data/manuscript_variables.json
 
 # Re-run manuscript variables
-uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+uv run python scripts/z_generate_manuscript_variables.py
 
 # Detect remaining unresolved tokens
-grep -r "{{" projects/templates/template_code_project/output/manuscript/ | grep -v ".json"
+grep -r "{{" output/manuscript/ | grep -v ".json"
 ```
 
 ### Missing figure in PDF
@@ -162,17 +168,17 @@ grep -r "{{" projects/templates/template_code_project/output/manuscript/ | grep 
 
 **Fix**:
 ```bash
-ls projects/templates/template_code_project/output/figures/*.png
-uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
+ls output/figures/*.png
+uv run python scripts/optimization_analysis.py
 ```
 
 ### BibTeX citation error / PDF fails to compile
 
 **Symptom**: XeLaTeX exits with a BibTeX error or undefined citation key.
 
-**Cause**: Malformed entry in `manuscript/references.bib` (unclosed braces, duplicate keys, missing required fields).
+**Cause**: Malformed entry in `docs/manuscript/references.bib` (unclosed braces, duplicate keys, missing required fields).
 
-**Fix**: Validate `manuscript/references.bib` with a BibTeX linter or check `projects/templates/template_code_project/output/pdf/_combined_manuscript.log` for the specific error message. Negative control: a deliberately malformed bib entry (unclosed brace or duplicate key) makes the render fail with that exact error instead of producing a PDF with unresolved `[?]` citations.
+**Fix**: Validate `docs/manuscript/references.bib` with a BibTeX linter or check `output/pdf/_combined_manuscript.log` for the specific error message. Negative control: a deliberately malformed bib entry (unclosed brace or duplicate key) makes the render fail with that exact error instead of producing a PDF with unresolved `[?]` citations.
 
 ### Slides not generated
 

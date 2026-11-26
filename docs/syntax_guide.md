@@ -12,8 +12,8 @@ Hyperlinks must be informative. Never use placeholder text.
 - **GOOD**: See the [Research Project Template](https://github.com/docxology/template).
 
 For internal cross-references inside `manuscript/`, prefer relative paths:
-- **BAD**: See `https://github.com/docxology/template/blob/main/projects/templates/template_code_project/src/template_code_project/core/optimizer.py`
-- **GOOD**: See [`projects/templates/template_code_project/src/template_code_project/core/optimizer.py`](https://github.com/docxology/template/blob/main/projects/templates/template_code_project/src/template_code_project/core/optimizer.py)
+- **BAD**: See `https://github.com/docxology/template/blob/main/src/template_code_project/core/optimizer.py`
+- **GOOD**: See [`src/template_code_project/core/optimizer.py`](https://github.com/docxology/template/blob/main/src/template_code_project/core/optimizer.py)
 
 ---
 
@@ -58,14 +58,14 @@ When specifying numeric results in the manuscript, use the `{{VARIABLE_NAME}}` s
 > The authoritative list of substitution tokens is the return value of
 > `src/template_code_project/core/manuscript_variables.py::generate_variables()`. The regression
 > test `tests/core/test_manuscript_variables.py::test_all_manuscript_tokens_are_generated`
-> reads every `manuscript/*.md` file and fails CI on any token used in prose
+> reads every `docs/manuscript/*.md` file and fails CI on any token used in prose
 > that the generator does not emit. **Treat the generator function — not this
 > table — as the single source of truth**; the table below is illustrative
 > and may lag behind the code.
 
 Illustrative subset of tokens defined in `src/template_code_project/core/manuscript_variables.py::generate_variables()`:
 
-**CONFIG_* — Derived from `manuscript/config.yaml`**
+**CONFIG_* — Derived from `docs/manuscript/config.yaml`**
 
 | Token | Value (default config) | Source |
 |---|---|---|
@@ -140,7 +140,7 @@ Illustrative subset of tokens defined in `src/template_code_project/core/manuscr
 
 1. Add a key/value pair to `generate_variables()` in `src/template_code_project/core/manuscript_variables.py`.
 2. Add a corresponding test assertion in `tests/core/test_manuscript_variables.py` (the live cross-reference test `test_all_manuscript_tokens_are_generated` will catch any gap automatically).
-3. Verify it produces a non-empty string: `python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py && python -c "import json; d=json.load(open('projects/templates/template_code_project/output/data/manuscript_variables.json')); print(d['MY_TOKEN'])"`.
+3. Verify it produces a non-empty string: `python scripts/z_generate_manuscript_variables.py && python -c "import json; d=json.load(open('output/data/manuscript_variables.json')); print(d['MY_TOKEN'])"`.
 4. Reference it in a manuscript `.md` file as `{{MY_TOKEN}}`.
 
 ### Detecting Unresolved Tokens
@@ -148,7 +148,7 @@ Illustrative subset of tokens defined in `src/template_code_project/core/manuscr
 If a token remains unresolved, the literal `{{TOKEN_NAME}}` will appear in the rendered PDF. Detect before rendering:
 
 ```bash
-grep -r "{{" projects/templates/template_code_project/output/manuscript/ 2>/dev/null \
+grep -r "{{" output/manuscript/ 2>/dev/null \
   && echo "UNRESOLVED TOKENS FOUND" || echo "All tokens resolved"
 ```
 
@@ -165,10 +165,10 @@ def example() -> bool:
 
 For shell commands:
 ```bash
-uv run pytest projects/templates/template_code_project/tests/ -v
+uv run pytest tests/ -v
 ```
 
-For inline code referencing file paths, use single backticks: `projects/templates/template_code_project/src/template_code_project/core/optimizer.py`
+For inline code referencing file paths, use single backticks: `src/template_code_project/core/optimizer.py`
 
 ---
 
@@ -200,7 +200,7 @@ To add a figure that appears in `03_results.md`:
    ![Caption text describing the figure.](../output/figures/convergence_plot.png){#fig:new_label}
    ```
 3. Reference in text using Pandoc-crossref: `See [@fig:new_label].`
-4. Update `manuscript/AGENTS.md` to document the new figure label and generator.
+4. Update `docs/manuscript/AGENTS.md` to document the new figure label and generator.
 5. Re-run the full pipeline to verify the figure appears in the PDF.
 
 ---

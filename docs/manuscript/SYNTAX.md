@@ -1,6 +1,6 @@
 # Manuscript Syntax Reference (template_code_project)
 
-Project-specific overlay on the canonical [`docs/guides/manuscript-semantics.md`](../../../../docs/guides/manuscript-semantics.md) — read that file first; this file documents the **template_code_project**-specific figure registry, equation labels, and `{{TOKEN}}` table.
+Project-specific overlay on the canonical [`docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/manuscript-semantics.md) — read that file first; this file documents the **template_code_project**-specific figure registry, equation labels, and `{{TOKEN}}` table.
 
 ## Citation Syntax (Pandoc)
 
@@ -58,7 +58,7 @@ Reference equations with `[@eq:label]` (parenthetical) or `@eq:label` (narrative
 
 ```markdown
 <!-- Figure with label -->
-![Convergence plot showing objective value vs iteration](../output/figures/convergence_plot.png){#fig:convergence width=80%}
+![Convergence plot showing objective value vs iteration](../../output/figures/convergence_plot.png){#fig:convergence width=80%}
 
 <!-- Reference in text -->
 [@fig:convergence] demonstrates...
@@ -172,8 +172,8 @@ Files are assembled in lexicographic order by `infrastructure/rendering/pdf_rend
 
 ## See Also
 
-- [`../../../docs/guides/manuscript-semantics.md`](../../../../docs/guides/manuscript-semantics.md) — Repository-wide canonical semantics
+- [`../../../docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/manuscript-semantics.md) — Repository-wide canonical semantics
 - [`AGENTS.md`](AGENTS.md) — RASP protocol and AI agent constraints
-- [`../docs/rendering_pipeline.md`](../docs/rendering_pipeline.md) — Full rendering flow
-- [`../docs/syntax_guide.md`](../docs/syntax_guide.md) — Complete `{{VARIABLE}}` token reference
+- [`../docs/rendering_pipeline.md`](../rendering_pipeline.md) — Full rendering flow
+- [`../docs/syntax_guide.md`](../syntax_guide.md) — Complete `{{VARIABLE}}` token reference
 - [`preamble.md`](preamble.md) — Active LaTeX preamble

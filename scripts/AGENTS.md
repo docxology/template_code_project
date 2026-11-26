@@ -10,7 +10,7 @@ The `scripts/` directory contains **Thin Orchestrators**. In the context of the 
 - **Integration examples**: Demonstrates how to use `src/` modules securely in research workflows.
 - **Automated figure generation**: Scripts generate publication-ready figures via `infrastructure.rendering`.
 - **Data export**: Structured data output for deterministic tracking.
-- **Declared analysis order**: `manuscript/config.yaml` selects optimization,
+- **Declared analysis order**: `docs/manuscript/config.yaml` selects optimization,
   benchmark, dashboard, API documentation, then manuscript variables.
   `z_generate_manuscript_variables.py` consumes the fresh optimization
   artifacts and runs last. Connector and provenance utilities are outside
@@ -91,7 +91,7 @@ main()
 
 Scripts use hardcoded parameters for reproducibility:
 
-- **Step sizes**: `[0.01, 0.1, 0.5, 1.0, 1.5, 2.5]` (read from `manuscript/config.yaml` → `experiment.step_sizes`; the six configured values) for convergence comparison
+- **Step sizes**: `[0.01, 0.1, 0.5, 1.0, 1.5, 2.5]` (read from `docs/manuscript/config.yaml` → `experiment.step_sizes`; the six configured values) for convergence comparison
 - **Initial point**: `[0.0]` for 1D optimization
 - **Plot settings**: 300 DPI, tight bounding box
 - **Output directories**: `output/figures/`, `output/data/`
@@ -143,7 +143,7 @@ Thin wrapper → [`src/template_code_project/dashboard/dashboard.py`](../src/tem
 
 ### 00_preflight.py
 
-Thin wrapper → [`infrastructure.rendering.preflight`](../../../../infrastructure/rendering/preflight.py).
+Thin wrapper → [`infrastructure.rendering.preflight`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/infrastructure/rendering/preflight.py).
 
 ### 04_benchmark_stage.py
 

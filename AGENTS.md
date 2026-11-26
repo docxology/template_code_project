@@ -13,7 +13,7 @@ Decision memory and verifier hardening follow [`docs/rules/memory_and_decision_r
 | `scripts/` | Thin orchestrators; may import `infrastructure/` and `src/` |
 | Live counts | Link [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/main/docs/_generated/COUNTS.md); do not hardcode measured test totals or coverage % |
 
-Enforced by `check_project_src_infrastructure_boundary` via `scripts/audit/check_template_drift.py --strict` and `manuscript/layer_contract.yaml`.
+Enforced by `check_project_src_infrastructure_boundary` via `scripts/audit/check_template_drift.py --strict` and `docs/manuscript/layer_contract.yaml`.
 
 ## Overview
 
@@ -30,7 +30,7 @@ A research project exemplifying mathematical optimization algorithms with rigoro
 
 ### Research Quality Assurance
 
-- **Test suite**: covers edge cases, stability analysis, performance benchmarks, dashboard invariants, and full dashboard build; `projects/templates/template_code_project/src/` measures well above the 90% minimum gate enforced by both the project `pyproject.toml` and the root pipeline. Live test count + achieved coverage: [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/main/docs/_generated/COUNTS.md).
+- **Test suite**: covers edge cases, stability analysis, performance benchmarks, dashboard invariants, and full dashboard build; `src/` measures well above the 90% minimum gate enforced by both the project `pyproject.toml` and the root pipeline. Live test count + achieved coverage: [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/main/docs/_generated/COUNTS.md).
 - **Deterministic algorithms**: Reproducible results; tests avoid nondeterministic RNG unless documented (see `docs/agent_instructions.md`)
 - **Documentation**: Complete type hints, docstrings, and examples
 - **Parameter Validation**: Robust input checking and error handling
@@ -46,7 +46,7 @@ A research project exemplifying mathematical optimization algorithms with rigoro
 
 Double publish (Zenodo + GitHub) via `scripts/publish/publish_project_release.py`. Manuscript config enables transmission bookends, steganography profile documentation, and metadata-driven deposit filenames (`Author_2026_Convergence_{hash8}.pdf` — local working PDF remains `template_code_project_combined.pdf`).
 
-Current release/DOI records are generated from `manuscript/config.yaml`, `CITATION.cff`, `.zenodo.json`, GitHub, and Zenodo into [`docs/_generated/publication_records.md`](https://github.com/docxology/template/blob/main/docs/_generated/publication_records.md). Do not copy per-version DOI rows here.
+Current release/DOI records are generated from `docs/manuscript/config.yaml`, `CITATION.cff`, `.zenodo.json`, GitHub, and Zenodo into [`docs/_generated/publication_records.md`](https://github.com/docxology/template/blob/main/docs/_generated/publication_records.md). Do not copy per-version DOI rows here.
 
 Workflow reference: [`docs/guides/publishing-guide.md`](https://github.com/docxology/template/blob/main/docs/guides/publishing-guide.md) (transmission bookends + deposit filename sections) · [`infrastructure/publishing/README.md`](https://github.com/docxology/template/blob/main/infrastructure/publishing/README.md) (publishing module reference) · [`docs/maintenance/archival-targets.md`](https://github.com/docxology/template/blob/main/docs/maintenance/archival-targets.md) (archival targets). Render/stego path: [`docs/rendering_pipeline.md`](docs/rendering_pipeline.md).
 
@@ -125,8 +125,8 @@ logger.info("Iterations: %s, Final objective: %s", result.iterations, result.obj
 
 ```bash
 # From repository root — execute the full analysis pipeline
-uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
-# Writes figures, data, reports, and dashboard under projects/templates/template_code_project/output/
+uv run python scripts/optimization_analysis.py
+# Writes figures, data, reports, and dashboard under output/
 ```
 
 ### Manuscript variable hydration (strict default)
@@ -134,9 +134,9 @@ uv run python projects/templates/template_code_project/scripts/optimization_anal
 `scripts/z_generate_manuscript_variables.py` calls `generate_variables(..., require_analysis_outputs=True)` by default and fails when `output/data/optimization_results.csv` is absent. Pass `--allow-draft` only for intentional early drafts that may use `"N/A"` fallbacks for result-derived tokens.
 
 ```bash
-uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+uv run python scripts/z_generate_manuscript_variables.py
 # Draft-only (skip analysis CSV requirement):
-uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py --allow-draft
+uv run python scripts/z_generate_manuscript_variables.py --allow-draft
 ```
 
 ### Scientific Analysis Features
@@ -179,10 +179,10 @@ overlays are validation inputs only; they do not execute autonomous agents.
 
 ```bash
 # Run project tests
-uv run pytest projects/templates/template_code_project/tests/ -v
+uv run pytest tests/ -v
 
 # With coverage
-uv run pytest projects/templates/template_code_project/tests/ --cov=projects/templates/template_code_project/src --cov-report=html
+uv run pytest tests/ --cov=projects/templates/template_code_project/src --cov-report=html
 ```
 
 ## API Reference
@@ -374,7 +374,7 @@ This project complies with the template development standards in the root **[`AG
 
 ```bash
 # Test coverage verification
-uv run pytest projects/templates/template_code_project/tests/ --cov=projects/templates/template_code_project/src --cov-fail-under=90
+uv run pytest tests/ --cov=projects/templates/template_code_project/src --cov-fail-under=90
 
 # Type hint verification (same project source surface used by CI)
 uv run mypy projects/templates/template_code_project/src
@@ -515,6 +515,6 @@ Step sizes: 100%|██████████████████| 4/4 [00
 - [Root AGENTS.md](https://github.com/docxology/template/blob/main/projects/AGENTS.md) - Template documentation
 - [Publishing guide](https://github.com/docxology/template/blob/main/docs/guides/publishing-guide.md) · [Zenodo DOI strategy](https://github.com/docxology/template/blob/main/docs/guides/zenodo-doi-strategy.md) — split `publication.doi` (concept) / `version_doi` layout
 - [infrastructure/scientific/](https://github.com/docxology/template/blob/main/infrastructure/scientific/AGENTS.md) - Scientific utilities
-- [`manuscript/SYNTAX.md`](manuscript/SYNTAX.md) — Pandoc citation/cross-reference syntax for this project
+- [`docs/manuscript/SYNTAX.md`](docs/manuscript/SYNTAX.md) — Pandoc citation/cross-reference syntax for this project
 - [`../../docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/main/docs/guides/manuscript-semantics.md) — Repository-wide manuscript semantics
 - [`../../AGENTS.md`](https://github.com/docxology/template/blob/main/projects/AGENTS.md#permanent-canonical-exemplars) — public exemplar roster

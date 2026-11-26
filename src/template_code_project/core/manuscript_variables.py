@@ -1,7 +1,7 @@
 """Manuscript variable generation for the template_code_project exemplar.
 
 Reads:
-- ``manuscript/config.yaml``          — experiment parameters and paper metadata
+- ``docs/manuscript/config.yaml``          — experiment parameters and paper metadata
 - ``output/data/optimization_results.csv``  — per-step-size convergence data
 - ``output/reports/stability_analysis.json``
 
@@ -41,12 +41,14 @@ try:
     )
     from .experiment_config import load_experiment_config
     from .optimizer import quadratic_optimum
+    from .project_paths import manuscript_config_path
 except ImportError:  # pragma: no cover — standalone load (no package context)
     from template_code_project.core._runtime import get_logger, project_root, write_analysis_bytes  # type: ignore[no-redef]
     from template_code_project.core._runtime import read_analysis_bytes  # type: ignore[no-redef]
     from template_code_project.core._runtime import analysis_metadata_observation, retain_analysis_metadata  # type: ignore[no-redef]
     from template_code_project.core.experiment_config import load_experiment_config  # type: ignore[no-redef]
     from template_code_project.core.optimizer import quadratic_optimum  # type: ignore[no-redef]
+    from template_code_project.core.project_paths import manuscript_config_path  # type: ignore[no-redef]
 
 logger = get_logger(__name__)
 
@@ -119,7 +121,7 @@ def _build_timestamp(*, observation: dict[str, Any] | None = None) -> str:
 
 
 def _load_config(project_root: Path) -> dict[str, Any]:
-    config_path = project_root / "manuscript" / "config.yaml"
+    config_path = manuscript_config_path(project_root)
     if not config_path.exists():
         logger.warning("Config file not found: %s", config_path)
         return {}
@@ -145,7 +147,7 @@ def _load_json_report(project_root: Path, name: str) -> dict[str, Any]:
 
 
 def _compute_config_hash(project_root: Path) -> str:
-    config_path = project_root / "manuscript" / "config.yaml"
+    config_path = manuscript_config_path(project_root)
     if not config_path.exists():
         return "N/A"
     return hashlib.sha256(read_analysis_bytes(project_root, config_path)).hexdigest()[:16]
@@ -270,9 +272,15 @@ def _parse_solution_vector(value: str) -> list[float]:
     return solution
 
 
+def _format_table_number(value: float, precision: int = 4) -> str:
+    """Keep large divergent values legible in narrow manuscript table cells."""
+    notation = "e" if abs(value) >= 1e6 else "f"
+    return f"{value:.{precision}{notation}}"
+
+
 def _format_solution_vector(solution: list[float], *, precision: int = 4) -> str:
     """Format scalar solutions compactly and vector solutions unambiguously."""
-    formatted = [f"{value:.{precision}f}" for value in solution]
+    formatted = [_format_table_number(value, precision) for value in solution]
     return formatted[0] if len(formatted) == 1 else "[" + ", ".join(formatted) + "]"
 
 
@@ -284,7 +292,7 @@ def _format_solution_vector(solution: list[float], *, precision: int = 4) -> str
 def generate_variables(project_root: Path, *, require_analysis_outputs: bool = False) -> dict[str, str]:
     """Generate all manuscript variables from config and analysis outputs.
 
-    Reads ``manuscript/config.yaml`` and analysis outputs from ``output/``.
+    Reads ``docs/manuscript/config.yaml`` and analysis outputs from ``output/``.
     Returns a flat mapping of UPPERCASE_KEY → string value for ``{{TOKEN}}``
     substitution.  When data files are absent and *require_analysis_outputs*
     is False (draft mode), fallback sentinel values (``"N/A"``) are used so the
@@ -376,14 +384,14 @@ def generate_variables(project_root: Path, *, require_analysis_outputs: bool = F
         table_rows = []
         for r in results:
             sol = _format_solution_vector(_parse_solution_vector(r["solution"]))
-            obj = float(r["objective_value"])
+            obj = _format_table_number(float(r["objective_value"]))
             iters = int(r["iterations"])
             conv = "Yes" if r["converged"] == "True" else "No"
             termination_reason = r.get("termination_reason") or ("converged" if conv == "Yes" else "unknown")
             table_rows.append(
                 f"| {float(r['step_size']):.2f}          "
                 f"| {sol:<16} "
-                f"| {obj:.4f}          "
+                f"| {obj}          "
                 f"| {iters:<10} "
                 f"| {conv:<9} | {termination_reason:<16} |"
             )

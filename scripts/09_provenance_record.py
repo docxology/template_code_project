@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Provenance DAG recording stage.
 
-Reads the ``provenance:`` block from ``manuscript/config.yaml`` and, when
+Reads optional project-root ``provenance.yaml`` and, when
 enabled, records a provenance node for the current pipeline run to the
 content-addressed DAG store via the shared ``infrastructure.provenance``
 store — the same store class every other provenance-recording surface in

@@ -34,6 +34,14 @@ def resolve_project_root(package_name: str) -> Path:
     return _DEFAULT_ROOT
 
 
+def manuscript_config_path(root: Path) -> Path:
+    """Locate the current manuscript config or the legacy fork config."""
+    canonical = root / "docs" / "manuscript" / "config.yaml"
+    if canonical.is_file():
+        return canonical
+    return root / "manuscript" / "config.yaml"
+
+
 def project_output_dirs(project_root: Path | None = None) -> dict[str, Path]:
     """Return common output directories for the code exemplar."""
     root = project_root or _DEFAULT_ROOT

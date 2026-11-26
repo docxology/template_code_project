@@ -561,9 +561,8 @@ def test_all_manuscript_tokens_are_generated(tmp_path):
     produced = set(generate_variables(root))
 
     project_root = Path(__file__).resolve().parents[2]
-    manuscript_dir = project_root / "manuscript"
-    if not manuscript_dir.is_dir():
-        pytest.skip("manuscript/ directory not found; skipping cross-reference check")
+    manuscript_dir = project_root / "docs/manuscript"
+    assert manuscript_dir.is_dir(), manuscript_dir
 
     unresolved: dict[str, list[str]] = {}
     for md_file in sorted(manuscript_dir.glob("*.md")):
@@ -633,7 +632,7 @@ def test_step_sensitivity_caption_numbers_match_sweep():
     first_iters = sweep.iterations[0]
     last_iters = sweep.iterations[-1]
 
-    caption = (Path(__file__).resolve().parents[2] / "manuscript" / "03_results.md").read_text(encoding="utf-8")
+    caption = (Path(__file__).resolve().parents[2] / "docs/manuscript/03_results.md").read_text(encoding="utf-8")
     assert f"({n_points} points)" in caption
     assert f"{first_iters} iterations at the smallest" in caption
     assert f"to {last_iters} iterations at" in caption

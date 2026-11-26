@@ -74,7 +74,7 @@ analysis artifact, update the relevant registry and this inventory deliberately.
    - **Data** → `src/template_code_project/analysis/`
    - **Reports** → `src/template_code_project/dashboard/dashboard.py` or `infrastructure.reporting.*`
 2. Append a row to the table above naming the file, role, generator, and pipeline stage.
-3. If the new artifact is consumed by the manuscript, add a `{{TOKEN}}` to `src/template_code_project/core/manuscript_variables.py::generate_variables()` and reference it in the appropriate `manuscript/*.md` section.
+3. If the new artifact is consumed by the manuscript, add a `{{TOKEN}}` to `src/template_code_project/core/manuscript_variables.py::generate_variables()` and reference it in the appropriate `docs/manuscript/*.md` section.
 4. Re-run the pipeline (`./run.sh --pipeline --project templates/template_code_project --mode core` or `uv run python scripts/runner/execute_pipeline.py --project templates/template_code_project --mode core`) and confirm the new file appears.
 
 ## Regeneration Sequence
@@ -83,13 +83,13 @@ If any artifact is corrupted or stale:
 
 ```bash
 # 1. Clean (optional but recommended for full regenerations)
-rm -rf projects/templates/template_code_project/output/
+rm -rf output/
 
 # 2. Run analysis (produces figures/, data/, reports/, citations/)
-uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
+uv run python scripts/optimization_analysis.py
 
 # 3. Hydrate manuscript variables (produces output/manuscript/ + output/data/manuscript_variables.json)
-uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+uv run python scripts/z_generate_manuscript_variables.py
 
 # 4. Render PDF (produces pdf/, slides/, web/)
 uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
@@ -108,4 +108,4 @@ uv run python scripts/runner/execute_pipeline.py --project templates/template_co
 
 - [`output_conventions.md`](output_conventions.md) — layout, regeneration policy, troubleshooting
 - [`rendering_pipeline.md`](rendering_pipeline.md) — 4-phase manuscript → PDF flow
-- [`../manuscript/AGENTS.md`](../manuscript/AGENTS.md) — manuscript directory and `{{TOKEN}}` protocol
+- [`../manuscript/AGENTS.md`](manuscript/AGENTS.md) — manuscript directory and `{{TOKEN}}` protocol

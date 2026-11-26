@@ -257,7 +257,7 @@ class TestPublishingExtended:
 @pytest.mark.slow
 class TestMainBranches:
     def _copy_manuscript(self, tmp_path: Path) -> None:
-        shutil.copytree(PROJECT_ROOT / "manuscript", tmp_path / "manuscript")
+        shutil.copytree(PROJECT_ROOT / "docs/manuscript", tmp_path / "manuscript")
 
     def test_main_without_infra(self, tmp_path: Path):
         self._copy_manuscript(tmp_path)
@@ -306,7 +306,7 @@ class TestMainBranches:
 
 class TestMainErrors:
     def _copy_manuscript(self, tmp_path: Path) -> None:
-        shutil.copytree(PROJECT_ROOT / "manuscript", tmp_path / "manuscript")
+        shutil.copytree(PROJECT_ROOT / "docs/manuscript", tmp_path / "manuscript")
 
     def test_main_reraises_script_execution_error(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         if not analysis_mod.INFRASTRUCTURE_AVAILABLE:

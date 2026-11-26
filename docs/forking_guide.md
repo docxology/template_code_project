@@ -29,11 +29,11 @@ uv run python projects/working/my_project/scripts/optimization_analysis.py
 
 **⚠️ Confidentiality invariant.** The repo `.gitignore` is configured so
 that **only** the public canonical exemplars listed in
-[`../../../docs/_generated/active_projects.md`](../../../../docs/_generated/active_projects.md)
+[`../../../docs/_generated/active_projects.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/active_projects.md)
 under `projects/` are ever git-tracked. Your fork (`projects/working/my_project/`)
 is local-only and won't be pushed to the public repo even if you `git
 add -f` it — `scripts/audit/check_tracked_all.py` blocks the push in
-`pre-push-quick`. Read [`../../../../CLAUDE.md`](../../../../CLAUDE.md)
+`pre-push-quick`. Read [`../../../../CLAUDE.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/CLAUDE.md)
 "CONFIDENTIALITY INVARIANT" for the full fence.
 
 ## What you're forking
@@ -56,7 +56,7 @@ the short version:
 
 | Class | Examples | Action |
 |---|---|---|
-| REQUIRED — pipeline gate | `src/template_code_project/core/optimizer.py` and `core/invariants.py` (math primitives), all `tests/test_*.py`, `pyproject.toml`, `manuscript/config.yaml`, `manuscript/*.md`, `manuscript/references.bib`, `manuscript/preamble.md` | Keep them; the 90% coverage gate + LaTeX render depend on them |
+| REQUIRED — pipeline gate | `src/template_code_project/core/optimizer.py` and `core/invariants.py` (math primitives), all `tests/test_*.py`, `pyproject.toml`, `docs/manuscript/config.yaml`, `docs/manuscript/*.md`, `docs/manuscript/references.bib`, `docs/manuscript/preamble.md` | Keep them; the 90% coverage gate + LaTeX render depend on them |
 | REQUIRED — orchestration | `src/template_code_project/analysis/`, `src/template_code_project/figures/`, `src/template_code_project/dashboard/dashboard.py`, `src/template_code_project/core/manuscript_variables.py`, all `scripts/*.py` | May import `infrastructure.*`; exercised by the end-to-end pipeline run |
 | AESTHETIC | `docs/*.md`, `*/STYLE.md`, `*/PATTERNS.md`, `*/CONVENTIONS.md`, `*/AGENTS.md`, `*/README.md` | Drift detected only by `scripts/audit/check_template_drift.py` and audits; aspire to update them when code changes |
 
@@ -73,7 +73,7 @@ infrastructure-coupled code.
 ### 2. Update the manuscript variables
 `src/template_code_project/core/manuscript_variables.py::generate_variables()` is the **single
 function** that produces every numeric token referenced in
-`manuscript/*.md`. When you change the algorithm:
+`docs/manuscript/*.md`. When you change the algorithm:
 
 1. Add new tokens to `generate_variables()`.
 2. Reference them in your manuscript as `{{NEW_TOKEN}}`.
@@ -122,4 +122,4 @@ numerical, fork that one instead.
 - [`testing_philosophy.md`](testing_philosophy.md) — zero-mock standard
 - [`output_inventory.md`](output_inventory.md) — producer/consumer graph
 - [`troubleshooting.md`](troubleshooting.md) — symptom-driven fixes
-- [`../../../scripts/audit/check_template_drift.py`](../../../../scripts/audit/check_template_drift.py) — the drift checker
+- [`../../../scripts/audit/check_template_drift.py`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/scripts/audit/check_template_drift.py) — the drift checker

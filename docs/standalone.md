@@ -10,7 +10,7 @@
 - Stable concept DOI: [10.5281/zenodo.20417136](https://doi.org/10.5281/zenodo.20417136)
 - Latest deposited version DOI: [10.5281/zenodo.20931934](https://zenodo.org/records/20931934)
 - Additional declared locations: [github_pages](https://docxology.github.io/template_code_project/), [huggingface_hub](https://huggingface.co/datasets/ActiveInference/template_code_project), [ipfs_pinata](https://gateway.pinata.cloud/ipfs/QmSVZF1MisqWeX1C7vFUhcwCkYvZXBuq5TS9MzLFNJJykS), [netlify](https://6a4440a789b44ad53f3af09b--tranquil-kleicha-0c9203.netlify.app), [osf](https://osf.io/mcv8j/), [pypi](https://test.pypi.org/project/template-code-project/2.5.2/), [software_heritage](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/docxology/template_code_project)
-- Metadata source: [`manuscript/config.yaml`](manuscript/config.yaml); citation sidecars live at the project root.
+- Metadata source: [`docs/manuscript/config.yaml`](manuscript/config.yaml); citation sidecars live at the project root.
 
 Additional locations are config-declared publication evidence; the central index records whether external GitHub and Zenodo checks were refreshed.
 
@@ -27,7 +27,12 @@ variables, and publication-ready metadata.
 Use it for computational research where claims should trace to source code,
 analysis outputs, figures, and project-local tests.
 
-## Clean Copy Command
+## Use this standalone checkout
+
+Follow the [quick start](quickstart.md) to run the tests, regenerate evidence,
+and render with the pinned template.
+
+## Copy the exemplar from upstream
 
 From the template repository root:
 
@@ -49,7 +54,7 @@ rsync -a \
 
 ## Required Post-Fork Edits
 
-- Update `manuscript/config.yaml`, `domain_profile.yaml`, `experiment_plan.yaml`,
+- Update `docs/manuscript/config.yaml`, `domain_profile.yaml`, `experiment_plan.yaml`,
   `CITATION.cff`, `.zenodo.json`, `codemeta.json`, and `pyproject.toml`.
 - Replace the optimizer, experiment config, manuscript variables, and figure
   generation with the fork's research code.
@@ -66,7 +71,7 @@ uv run python projects/working/my_code_project/scripts/optimization_analysis.py
 uv run python projects/working/my_code_project/scripts/z_generate_manuscript_variables.py
 ```
 
-For the public exemplar:
+For an exemplar still inside the upstream template checkout:
 
 ```bash
 uv run pytest projects/templates/template_code_project/tests/ \

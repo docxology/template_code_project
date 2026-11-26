@@ -8,6 +8,8 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
 
+from template_code_project.core.project_paths import manuscript_config_path as manuscript_config_path
+
 _DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 _PROJECT_ROOT_OVERRIDE: ContextVar[Path | None] = ContextVar("template_code_project_root", default=None)
 

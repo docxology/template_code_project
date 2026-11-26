@@ -58,7 +58,7 @@ not installed. See [`testing_philosophy.md`](testing_philosophy.md).
 1. Add a generator function to `src/template_code_project/figures/` and wire it through `src/template_code_project/analysis/`
    (script entry: `scripts/optimization_analysis.py`) that writes a PNG to
    `output/figures/` with a fixed filename (e.g. `convergence_plot.png`).
-2. In `manuscript/03_results.md`, add a Pandoc image line:
+2. In `docs/manuscript/03_results.md`, add a Pandoc image line:
    ```markdown
    ![Caption text.](../output/figures/convergence_plot.png){#fig:new_label}
    ```
@@ -87,7 +87,7 @@ See [`troubleshooting.md`](troubleshooting.md#literal-token_name-appears-in-the-
 
 Working copy:
 ```
-projects/templates/template_code_project/output/pdf/template_code_project_combined.pdf
+output/pdf/template_code_project_combined.pdf
 ```
 
 Promoted copy (used by CI for artifact upload):
@@ -125,4 +125,4 @@ correctly.
 - [`troubleshooting.md`](troubleshooting.md) — symptom-driven recipes.
 - [`output_conventions.md`](output_conventions.md) — output regeneration rules.
 - [`syntax_guide.md`](syntax_guide.md) — Pandoc-crossref syntax and token list.
-- [`../manuscript/AGENTS.md`](../manuscript/AGENTS.md) — token protocol and figure list.
+- [`../manuscript/AGENTS.md`](manuscript/AGENTS.md) — token protocol and figure list.
