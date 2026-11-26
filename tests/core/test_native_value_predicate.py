@@ -49,7 +49,7 @@ def actual_code_bodies(tmp_path: Path) -> tuple[ScalarQuadraticConfig, bytes, di
     """Run the actual complete authored grid and actual CSV/variable writers."""
     manuscript = tmp_path / "manuscript"
     manuscript.mkdir()
-    (manuscript / "config.yaml").write_bytes((PROJECT / "manuscript/config.yaml").read_bytes())
+    (manuscript / "config.yaml").write_bytes((PROJECT / "docs/manuscript/config.yaml").read_bytes())
     config = load_experiment_config(tmp_path)
     with project_root_context(tmp_path):
         results = run_convergence_experiment(config=config)
@@ -209,7 +209,7 @@ def test_declaration_data_cannot_replace_missing_or_malformed_numeric_inputs(act
 
 def test_actual_typed_loader_data_is_bound_to_every_explicit_authored_field(actual_code_bodies) -> None:
     config, _, _ = actual_code_bodies
-    experiment = yaml.safe_load((PROJECT / "manuscript/config.yaml").read_bytes())["experiment"]
+    experiment = yaml.safe_load((PROJECT / "docs/manuscript/config.yaml").read_bytes())["experiment"]
     validate_explicit_scalar_config(config, experiment)
     alterations = {
         "step_sizes": (0.1,),
@@ -232,7 +232,7 @@ def test_actual_typed_loader_data_is_bound_to_every_explicit_authored_field(actu
 
 def test_authored_config_fallback_and_malformed_declarations_do_not_qualify(actual_code_bodies) -> None:
     config, _, _ = actual_code_bodies
-    experiment = yaml.safe_load((PROJECT / "manuscript/config.yaml").read_bytes())["experiment"]
+    experiment = yaml.safe_load((PROJECT / "docs/manuscript/config.yaml").read_bytes())["experiment"]
     for field in tuple(experiment):
         incomplete = {key: value for key, value in experiment.items() if key != field}
         with pytest.raises(ValueError, match="every explicit authored experiment field"):

@@ -135,18 +135,18 @@ def test_dimension_mismatch_A(self):
 
 ```bash
 # Run with coverage (gate is 90% enforced by pyproject.toml)
-uv run pytest projects/templates/template_code_project/tests/ \
+uv run pytest tests/ \
     --cov=projects/templates/template_code_project/src \
     --cov-report=term-missing \
     --cov-fail-under=90
 
 # Generate HTML report
-uv run pytest projects/templates/template_code_project/tests/ \
+uv run pytest tests/ \
     --cov=projects/templates/template_code_project/src \
     --cov-report=html
 ```
 
-The `pyproject.toml` enforces `fail_under = 90` as the CI gate. Live achieved coverage is tracked in [`docs/_generated/COUNTS.md`](../../../../docs/_generated/COUNTS.md). Do not delete tests to make a coverage number work — fix the gap.
+The `pyproject.toml` enforces `fail_under = 90` as the CI gate. Live achieved coverage is tracked in [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md). Do not delete tests to make a coverage number work — fix the gap.
 
 ## Determinism
 

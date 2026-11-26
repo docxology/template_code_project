@@ -6,7 +6,7 @@ This document defines the coding and communication style for the `template_code_
 
 ## 1. Zero-Mock Policy
 
-The most critical style rule is the absolute prohibition of mocking. The following are **forbidden** anywhere inside `projects/templates/template_code_project/tests/`:
+The most critical style rule is the absolute prohibition of mocking. The following are **forbidden** anywhere inside `tests/`:
 
 - `import unittest.mock`
 - `from unittest.mock import MagicMock, patch, create_autospec, Mock, AsyncMock`
@@ -37,7 +37,7 @@ assert abs(result.solution[0] - 2.0) < 1e-4  # x* = A^-1 b = 2.0
 
 **Verify cleanliness**:
 ```bash
-grep -r "unittest.mock\|MagicMock\|@patch" projects/templates/template_code_project/tests/ || echo "Clean"
+grep -r "unittest.mock\|MagicMock\|@patch" tests/ || echo "Clean"
 ```
 
 ---
@@ -56,7 +56,7 @@ Project code must delegate cross-cutting concerns to `infrastructure/`. The dele
 
 **Verify `src/` is clean**:
 ```bash
-grep -r "from infrastructure\|import infrastructure" projects/templates/template_code_project/src/ || echo "Clean"
+grep -r "from infrastructure\|import infrastructure" src/ || echo "Clean"
 ```
 
 ---
@@ -104,7 +104,7 @@ The infrastructure handles PDF rendering automatically.
 
 **Correct (concrete, from `01_introduction.md`)**:
 ```markdown
-The test suite in `projects/templates/template_code_project/tests/core/test_optimizer.py` verifies gradient
+The test suite in `tests/core/test_optimizer.py` verifies gradient
 calculations without mocks, using `numpy` arrays with known analytical solutions.
 PDF rendering is handled by `infrastructure/rendering/pdf_renderer.py` via Pandoc and LaTeX.
 ```
@@ -126,14 +126,14 @@ When AI agents or humans refer to files in logs, documentation, comments, or imp
 
 | Short Name | Absolute Path (from repo root) |
 |---|---|
-| optimizer | `projects/templates/template_code_project/src/template_code_project/core/optimizer.py` |
-| test suite | `projects/templates/template_code_project/tests/core/test_optimizer.py` |
-| conftest | `projects/templates/template_code_project/tests/conftest.py` |
-| analysis script | `projects/templates/template_code_project/scripts/optimization_analysis.py` |
-| variable hydration (logic) | `projects/templates/template_code_project/src/template_code_project/core/manuscript_variables.py` |
-| variable hydration (runner) | `projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py` |
-| config | `projects/templates/template_code_project/manuscript/config.yaml` |
-| results CSV | `projects/templates/template_code_project/output/data/optimization_results.csv` |
+| optimizer | `src/template_code_project/core/optimizer.py` |
+| test suite | `tests/core/test_optimizer.py` |
+| conftest | `tests/conftest.py` |
+| analysis script | `scripts/optimization_analysis.py` |
+| variable hydration (logic) | `src/template_code_project/core/manuscript_variables.py` |
+| variable hydration (runner) | `scripts/z_generate_manuscript_variables.py` |
+| config | `docs/manuscript/config.yaml` |
+| results CSV | `output/data/optimization_results.csv` |
 | final PDF | `output/templates/template_code_project/template_code_project_combined.pdf` |
 
 **Forbidden (relative / ambiguous)**:
@@ -145,8 +145,8 @@ output/figures/    # Relative to what?
 
 **Correct (absolute from repo root)**:
 ```
-projects/templates/template_code_project/src/template_code_project/core/optimizer.py
-projects/templates/template_code_project/output/figures/convergence_plot.png
+src/template_code_project/core/optimizer.py
+output/figures/convergence_plot.png
 ```
 
 ---

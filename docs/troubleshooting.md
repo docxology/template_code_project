@@ -4,7 +4,7 @@ Symptom-driven recipes for the most common breakage modes when running this proj
 
 ## Literal `{{TOKEN_NAME}}` appears in the rendered PDF
 
-**Cause.** A placeholder in `manuscript/*.md` was not substituted because
+**Cause.** A placeholder in `docs/manuscript/*.md` was not substituted because
 `scripts/z_generate_manuscript_variables.py` was not (re)run after the
 analysis stage, or the token is not defined in `src/template_code_project/core/manuscript_variables.py::generate_variables()`.
 
@@ -12,11 +12,11 @@ analysis stage, or the token is not defined in `src/template_code_project/core/m
 
 1. Run the variable-hydration stage:
    ```bash
-   uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+   uv run python scripts/z_generate_manuscript_variables.py
    ```
 2. Inspect the resolved values:
    ```bash
-   cat projects/templates/template_code_project/output/data/manuscript_variables.json | jq .
+   cat output/data/manuscript_variables.json | jq .
    ```
 3. Re-render:
    ```bash
@@ -33,18 +33,18 @@ analysis stage, or the token is not defined in `src/template_code_project/core/m
 
 1. Run analysis first:
    ```bash
-   uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
+   uv run python scripts/optimization_analysis.py
    ```
 2. Re-run variable hydration:
    ```bash
-   uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+   uv run python scripts/z_generate_manuscript_variables.py
    ```
 3. For intentional early drafts only (tokens may fall back to `"N/A"`):
    ```bash
-   uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py --allow-draft
+   uv run python scripts/z_generate_manuscript_variables.py --allow-draft
    ```
 
-## Edited `manuscript/config.yaml` but the figures or PDF didn't change
+## Edited `docs/manuscript/config.yaml` but the figures or PDF didn't change
 
 **Cause.** Stages 4-5 (analysis → render) were skipped or only the render
 stage ran (it does not re-execute `optimization_analysis.py`).
@@ -52,8 +52,8 @@ stage ran (it does not re-execute `optimization_analysis.py`).
 **Fix.** Run the analysis stage first, then variables, then render:
 
 ```bash
-uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
-uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
+uv run python scripts/optimization_analysis.py
+uv run python scripts/z_generate_manuscript_variables.py
 uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
 ```
 
@@ -71,7 +71,7 @@ before compilation.
 
 **Fix.**
 
-1. Verify `manuscript/03_results.md` contains the image with the
+1. Verify `docs/manuscript/03_results.md` contains the image with the
    correct anchor:
    ```markdown
    ![Caption.](../output/figures/convergence_plot.png){#fig:convergence}
@@ -92,9 +92,9 @@ before compilation.
 1. Look at the LaTeX log for the exact line:
    ```bash
    grep -nE "Citation|undefined|Error" \
-     projects/templates/template_code_project/output/pdf/_combined_manuscript.log
+     output/pdf/_combined_manuscript.log
    ```
-2. Check the entry exists in `manuscript/references.bib` and is well-formed.
+2. Check the entry exists in `docs/manuscript/references.bib` and is well-formed.
 3. Ensure all required BibTeX fields are present (`author`, `title`,
    `year`, plus type-specific fields).
 
@@ -104,12 +104,12 @@ before compilation.
 
 1. Re-run with the full traceback visible:
    ```bash
-   uv run python projects/templates/template_code_project/scripts/optimization_analysis.py 2>&1 | tee /tmp/analysis.log
+   uv run python scripts/optimization_analysis.py 2>&1 | tee /tmp/analysis.log
    ```
 2. Check the output directory exists and is writable.
-3. Validate `manuscript/config.yaml`:
+3. Validate `docs/manuscript/config.yaml`:
    ```bash
-   uv run python -c "import yaml; yaml.safe_load(open('projects/templates/template_code_project/manuscript/config.yaml'))"
+   uv run python -c "import yaml; yaml.safe_load(open('docs/manuscript/config.yaml'))"
    ```
 
 ## `uv` command not found
@@ -118,7 +118,7 @@ before compilation.
 
 ```bash
 # macOS / Linux
-Follow the [checksum-verified uv installation instructions](../../../../docs/operational/build/dependency-management.md#installing-uv).
+Follow the [checksum-verified uv installation instructions](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/operational/build/dependency-management.md#installing-uv).
 
 # Homebrew (macOS)
 brew install uv
@@ -132,7 +132,7 @@ Make sure `~/.local/bin` (or the install location) is on your `PATH`.
 
 1. Find which lines are uncovered:
    ```bash
-   uv run pytest projects/templates/template_code_project/tests/ \
+   uv run pytest tests/ \
        --cov=projects/templates/template_code_project/src \
        --cov-report=term-missing -v
    ```
@@ -146,7 +146,7 @@ Make sure `~/.local/bin` (or the install location) is on your `PATH`.
 **Fix.** Run from the repository root and let the workspace handle paths:
 
 ```bash
-uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
+uv run python scripts/optimization_analysis.py
 ```
 
 ## Sluggish test execution
@@ -157,16 +157,16 @@ repetitions; on a slow machine they can dominate the suite.
 **Fix.** Skip them for fast iteration:
 
 ```bash
-uv run pytest projects/templates/template_code_project/tests/ -k "not Performance"
+uv run pytest tests/ -k "not Performance"
 ```
 
 Or run the suite in parallel:
 
 ```bash
-uv run pytest projects/templates/template_code_project/tests/ -n auto
+uv run pytest tests/ -n auto
 ```
 
-## YAML parse error in `manuscript/config.yaml`
+## YAML parse error in `docs/manuscript/config.yaml`
 
 **Common mistakes.**
 
@@ -177,7 +177,7 @@ uv run pytest projects/templates/template_code_project/tests/ -n auto
 **Fix.** Validate the file before running:
 
 ```bash
-uv run python -c "import yaml; yaml.safe_load(open('projects/templates/template_code_project/manuscript/config.yaml'))"
+uv run python -c "import yaml; yaml.safe_load(open('docs/manuscript/config.yaml'))"
 ```
 
 ## PDF Rendering fails: `mmdc` could not find Chrome
@@ -229,7 +229,7 @@ zero collected tests is not a pass.**
 1. Run the **canonical per-project gate** directly (authoritative; what CI
    enforces project-by-project):
    ```bash
-   uv run pytest projects/templates/template_code_project/tests/ \
+   uv run pytest tests/ \
      --cov=projects/templates/template_code_project/src --cov-fail-under=90
    ```
 2. Or `uv sync` so the per-project `.venv` has the test deps.

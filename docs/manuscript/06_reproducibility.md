@@ -50,7 +50,7 @@ This exemplar also demonstrates `infrastructure.benchmark`. The thin orchestrato
 
 This manuscript demonstrates the template's "madlib" capability: every quantitative claim is injected from computed data at render time. The substitution system processed the following variables:
 
-- **Configuration variables**: Drawn from `manuscript/config.yaml` (`experiment:` section)
+- **Configuration variables**: Drawn from `docs/manuscript/config.yaml` (`experiment:` section)
 - **Result variables**: Computed from `output/data/optimization_results.csv`
 - **Stability variables**: Extracted from `output/reports/stability_analysis.json`
 - **Provenance variables**: Generated at substitution time (timestamps, hashes, versions)

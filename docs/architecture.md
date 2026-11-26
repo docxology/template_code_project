@@ -6,7 +6,7 @@ The `template_code_project` exemplar is designed around a strict separation of c
 
 | Layer | Primary Files | Public API | Invariants | Testability |
 |---|---|---|---|---|
-| **`src/` — Project Logic** | `src/template_code_project/core/optimizer.py`, `src/template_code_project/core/invariants.py`, `src/template_code_project/core/experiment_config.py`, `src/template_code_project/analysis/`, `src/template_code_project/figures/`, `src/template_code_project/dashboard/dashboard.py`, `src/template_code_project/core/manuscript_variables.py` | Optimizer primitives plus importable analysis/figure/dashboard builders | Math primitives stay pure; `core/experiment_config.py` is the single loader for `manuscript/config.yaml` → `experiment:` | Direct unit tests for pure logic; integration tests for generated artifacts |
+| **`src/` — Project Logic** | `src/template_code_project/core/optimizer.py`, `src/template_code_project/core/invariants.py`, `src/template_code_project/core/experiment_config.py`, `src/template_code_project/analysis/`, `src/template_code_project/figures/`, `src/template_code_project/dashboard/dashboard.py`, `src/template_code_project/core/manuscript_variables.py` | Optimizer primitives plus importable analysis/figure/dashboard builders | Math primitives stay pure; `core/experiment_config.py` is the single loader for `docs/manuscript/config.yaml` → `experiment:` | Direct unit tests for pure logic; integration tests for generated artifacts |
 | **`scripts/` — Orchestrators** | `scripts/optimization_analysis.py`, `scripts/build_dashboard.py`, `scripts/z_generate_manuscript_variables.py`, `scripts/generate_api_docs.py`, `scripts/00_preflight.py` | CLI compatibility wrappers and script entry points | No experiment, plotting, dashboard, or manuscript-variable logic lives only in scripts; `00_preflight` and `generate_api_docs` are AESTHETIC | Subprocess/integration tests exercise real commands |
 | **`infrastructure/` — Cross-Cutting** | `infrastructure/scientific/`, `infrastructure/reporting/`, `infrastructure/rendering/`, `infrastructure/core/`, `infrastructure/validation/` | Stability checks, benchmarking, PDF rendering, structured logging, progress bars | Generic reusable behavior only; no project-specific assumptions | Covered by separate `tests/infra_tests/` suite |
 
@@ -25,7 +25,7 @@ No arrows go upward. Core mathematical code stays independent; project analysis 
 
 ```mermaid
 graph TD
-    YAML[manuscript/config.yaml] -->|experiment:| CFG[src/template_code_project/core/experiment_config.py]
+    YAML[docs/manuscript/config.yaml] -->|experiment:| CFG[src/template_code_project/core/experiment_config.py]
 
     A[scripts/optimization_analysis.py] -->|delegates| A2[src/template_code_project/analysis/]
     A2 -->|reads| CFG
@@ -73,7 +73,7 @@ graph TD
 | `print()` inside `scripts/` | Bypasses structured logging; lost in CI output | Use `get_logger(__name__).info(...)` |
 | Hardcoded absolute output paths in pure math modules | Makes copied projects brittle | Keep paths relative to the project root and isolated to analysis/dashboard/manuscript-variable modules |
 | `unittest.mock`, `MagicMock`, `@patch` in `tests/` | Zero-mock policy | Compute real results with real numpy arrays |
-| Hardcoded step-size constants in `scripts/` or duplicate YAML parsing in `src/` | Configuration drift vs `manuscript/config.yaml` | Use `load_experiment_config()` from `src/template_code_project/core/experiment_config.py` |
+| Hardcoded step-size constants in `scripts/` or duplicate YAML parsing in `src/` | Configuration drift vs `docs/manuscript/config.yaml` | Use `load_experiment_config()` from `src/template_code_project/core/experiment_config.py` |
 
 ## How to Add a New Algorithm
 
@@ -81,10 +81,10 @@ Follow these five steps in order:
 
 1. **Add the function to `src/template_code_project/core/optimizer.py`** — Pure math only; no I/O; add type hints and a Google-style docstring; export from `__init__.py`.
 
-2. **Write a test class in `tests/core/test_optimizer.py`** — Follow the zero-mock pattern; use fixed numpy arrays; assert mathematical properties; run `uv run pytest projects/templates/template_code_project/tests/ --cov=projects/templates/template_code_project/src --cov-fail-under=90`.
+2. **Write a test class in `tests/core/test_optimizer.py`** — Follow the zero-mock pattern; use fixed numpy arrays; assert mathematical properties; run `uv run pytest tests/ --cov=projects/templates/template_code_project/src --cov-fail-under=90`.
 
-3. **Add the analysis call in `src/template_code_project/analysis/`** — Import the new function from `src/template_code_project/core/optimizer.py`; run it inside the existing experiment loop or add a new loop; write results to `projects/templates/template_code_project/output/data/` or `output/figures/`.
+3. **Add the analysis call in `src/template_code_project/analysis/`** — Import the new function from `src/template_code_project/core/optimizer.py`; run it inside the existing experiment loop or add a new loop; write results to `output/data/` or `output/figures/`.
 
 4. **Update output conventions** — Document the new output file in `docs/output_conventions.md`; generated `output/` files stay untracked.
 
-5. **Update manuscript section** — Edit `manuscript/02_methodology.md` with the algorithm description using concrete file paths (e.g., `projects/templates/template_code_project/src/template_code_project/core/optimizer.py::new_function()`); add any result variables to `src/template_code_project/core/manuscript_variables.py::generate_variables()`; reference figures with `\ref{fig:label}`.
+5. **Update manuscript section** — Edit `docs/manuscript/02_methodology.md` with the algorithm description using concrete file paths (e.g., `src/template_code_project/core/optimizer.py::new_function()`); add any result variables to `src/template_code_project/core/manuscript_variables.py::generate_variables()`; reference figures with `\ref{fig:label}`.

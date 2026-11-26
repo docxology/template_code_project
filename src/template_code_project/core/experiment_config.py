@@ -1,6 +1,6 @@
 """Shared experiment configuration for the template_code_project exemplar.
 
-Single loader for ``manuscript/config.yaml`` → ``experiment:`` block.
+Single loader for ``docs/manuscript/config.yaml`` → ``experiment:`` block.
 Used by analysis, figures, dashboard, and manuscript variable generation.
 """
 
@@ -14,6 +14,8 @@ from typing import Any
 
 import numpy as np
 import yaml
+
+from .project_paths import manuscript_config_path
 
 from .invariants import OptimizerSweepConfig
 
@@ -198,14 +200,14 @@ def _coerce_benchmark_dimensions(values: Any) -> tuple[int, ...]:
 
 
 def load_experiment_config(project_root: Path | None = None) -> ExperimentConfig:
-    """Load experiment parameters from ``manuscript/config.yaml``.
+    """Load experiment parameters from ``docs/manuscript/config.yaml``.
 
     Returns defaults matching the exemplar YAML when the file is missing.
     A present-but-malformed value never raises: the affected field falls
     back to its exemplar default and a warning names the field and value.
     """
     root = project_root or Path(__file__).resolve().parent.parent.parent.parent
-    config_path = root / "manuscript" / "config.yaml"
+    config_path = manuscript_config_path(root)
     if not config_path.exists():
         return ExperimentConfig()
 

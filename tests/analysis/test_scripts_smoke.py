@@ -15,14 +15,16 @@ def test_generate_api_docs_writes_reference(tmp_path: Path) -> None:
     """The actual script writes only its disposable project copy."""
     project = tmp_path / "project"
     project.mkdir()
-    for directory in ("scripts", "src", "manuscript"):
+    for directory in ("scripts", "src", "docs/manuscript"):
         shutil.copytree(PROJECT_ROOT / directory, project / directory, ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copy2(PROJECT_ROOT / "pyproject.toml", project / "pyproject.toml")
     canonical = PROJECT_ROOT / "output" / "docs" / "api_reference.md"
     before = canonical.read_bytes() if canonical.exists() else None
     script = project / "scripts" / "generate_api_docs.py"
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(PROJECT_ROOT.parents[2])
+    env["PYTHONPATH"] = os.pathsep.join(
+        path for path in (str(PROJECT_ROOT.parents[2]), env.get("PYTHONPATH")) if path
+    )
     result = subprocess.run(
         [sys.executable, str(script)],
         cwd=project,

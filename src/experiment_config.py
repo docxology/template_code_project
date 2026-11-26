@@ -1,6 +1,6 @@
 """Shared experiment configuration for the template_code_project exemplar.
 
-Single loader for ``manuscript/config.yaml`` → ``experiment:`` block.
+Single loader for ``docs/manuscript/config.yaml`` → ``experiment:`` block.
 Used by analysis, figures, dashboard, and manuscript variable generation.
 """
 
@@ -15,8 +15,10 @@ import yaml
 
 try:
     from .invariants import OptimizerSweepConfig
+    from .project_paths import manuscript_config_path
 except ImportError:  # pragma: no cover
     from invariants import OptimizerSweepConfig  # type: ignore[no-redef]
+    from project_paths import manuscript_config_path  # type: ignore[no-redef]
 
 
 _DEFAULT_STEP_SIZES: tuple[float, ...] = (0.01, 0.1, 0.5, 1.0, 1.5, 2.5)
@@ -89,12 +91,12 @@ def _coerce_int_tuple(values: Any, default: tuple[int, ...]) -> tuple[int, ...]:
 
 
 def load_experiment_config(project_root: Path | None = None) -> ExperimentConfig:
-    """Load experiment parameters from ``manuscript/config.yaml``.
+    """Load experiment parameters from ``docs/manuscript/config.yaml``.
 
     Returns defaults matching the exemplar YAML when the file is missing.
     """
     root = project_root or Path(__file__).resolve().parent.parent
-    config_path = root / "manuscript" / "config.yaml"
+    config_path = manuscript_config_path(root)
     if not config_path.exists():
         return ExperimentConfig()
 

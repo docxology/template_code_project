@@ -214,7 +214,7 @@ class TestMainPipelineSmoke:
     def test_main_writes_core_artifacts(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         import shutil
 
-        shutil.copytree(PROJECT_ROOT / "manuscript", tmp_path / "manuscript")
+        shutil.copytree(PROJECT_ROOT / "docs/manuscript", tmp_path / "manuscript")
 
         from src.analysis import main
 

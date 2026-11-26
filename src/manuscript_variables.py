@@ -1,7 +1,7 @@
 """Manuscript variable generation for the template_code_project exemplar.
 
 Reads:
-- ``manuscript/config.yaml``          — experiment parameters and paper metadata
+- ``docs/manuscript/config.yaml``          — experiment parameters and paper metadata
 - ``output/data/optimization_results.csv``  — per-step-size convergence data
 - ``output/reports/stability_analysis.json``
 
@@ -30,9 +30,11 @@ import yaml
 try:
     from .experiment_config import load_experiment_config
     from .optimizer import quadratic_optimum
+    from .project_paths import manuscript_config_path
 except ImportError:  # pragma: no cover
     from experiment_config import load_experiment_config  # type: ignore[no-redef]
     from optimizer import quadratic_optimum  # type: ignore[no-redef]
+    from project_paths import manuscript_config_path  # type: ignore[no-redef]
 
 try:
     from ._runtime import get_logger
@@ -64,7 +66,7 @@ def _build_timestamp() -> str:
 
 
 def _load_config(project_root: Path) -> dict[str, Any]:
-    config_path = project_root / "manuscript" / "config.yaml"
+    config_path = manuscript_config_path(project_root)
     if not config_path.exists():
         logger.warning("Config file not found: %s", config_path)
         return {}
@@ -92,7 +94,7 @@ def _load_json_report(project_root: Path, name: str) -> dict[str, Any]:
 
 
 def _compute_config_hash(project_root: Path) -> str:
-    config_path = project_root / "manuscript" / "config.yaml"
+    config_path = manuscript_config_path(project_root)
     if not config_path.exists():
         return "N/A"
     return hashlib.sha256(config_path.read_bytes()).hexdigest()[:16]
@@ -170,7 +172,7 @@ def _format_solution_vector(solution: list[float], *, precision: int = 4) -> str
 def generate_variables(project_root: Path, *, require_analysis_outputs: bool = False) -> dict[str, str]:
     """Generate all manuscript variables from config and analysis outputs.
 
-    Reads ``manuscript/config.yaml`` and analysis outputs from ``output/``.
+    Reads ``docs/manuscript/config.yaml`` and analysis outputs from ``output/``.
     Returns a flat mapping of UPPERCASE_KEY → string value for ``{{TOKEN}}``
     substitution.  When data files are absent and *require_analysis_outputs*
     is False (draft mode), fallback sentinel values (``"N/A"``) are used so the

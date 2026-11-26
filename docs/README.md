@@ -4,6 +4,11 @@
 
 **Quick Reference:** [Agent Instructions](agent_instructions.md) | [Architecture](architecture.md) | [Testing](testing_philosophy.md) | [Rendering](rendering_pipeline.md) | [Style](style_guide.md) | [Syntax](syntax_guide.md) | [Index](AGENTS.md)
 
+Start with the [quick start](quickstart.md) for setup, verification, and
+rendering. See the [manuscript index](manuscript/README.md), [standalone
+guide](standalone.md), and [project backlog](TODO.md) for source, reuse,
+and maintenance.
+
 ## Purpose
 
 The `docs/` directory contains the behavioral and architectural rules that govern modifications to the `template_code_project` exemplar. Every document here is a hard constraint — not a suggestion. The authoritative file index (including this `README.md` and `AGENTS.md`) lives in [`AGENTS.md`](AGENTS.md).
@@ -14,7 +19,7 @@ The `docs/` directory contains the behavioral and architectural rules that gover
 |---|---|---|
 | [`agent_instructions.md`](agent_instructions.md) | 7 hard rules for AI agents; verification checklist | AI agents, all developers |
 | [`architecture.md`](architecture.md) | Layer table, dependency direction, forbidden patterns, how-to-add-algorithm | Developers |
-| [`testing_philosophy.md`](testing_philosophy.md) | Zero-mock policy, test-file inventory, coverage mechanics, the gate-vs-exit-code rule (live counts → [`COUNTS.md`](../../../../docs/_generated/COUNTS.md)) | Developers, testers |
+| [`testing_philosophy.md`](testing_philosophy.md) | Zero-mock policy, test-file inventory, coverage mechanics, the gate-vs-exit-code rule (live counts → [`COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md)) | Developers, testers |
 | [`rendering_pipeline.md`](rendering_pipeline.md) | Mermaid/chrome prerequisite; 4-phase manuscript→PDF pipeline; config.yaml controls | Content authors, developers |
 | [`style_guide.md`](style_guide.md) | 7 rules: Zero-Mock, Infrastructure Delegation, Thin Orchestrator, Show-Not-Tell, Explicit Paths, Type Hints, Error Messages | Developers |
 | [`syntax_guide.md`](syntax_guide.md) | Markdown links, LaTeX refs, all `{{VARIABLE}}` tokens, figure label registry | Content authors |
@@ -57,7 +62,7 @@ project, mirror these invariants — they are what the repo's gates enforce:
 | Thin-orchestrator: `scripts/` only I/O + orchestration, logic in `src/`/`infrastructure/` | [`architecture.md`](architecture.md), [`style_guide.md`](style_guide.md) | code review + `src/` infra-import grep |
 | Zero mocks: real data, `tmp_path`, `pytest-httpserver` | [`testing_philosophy.md`](testing_philosophy.md) | `scripts/audit/verify_no_mocks.py` |
 | ≥90% project coverage on `src/` | [`testing_philosophy.md`](testing_philosophy.md) | `--cov-fail-under=90` (canonical command below) |
-| `manuscript/config.yaml` is the single source of run policy | [`rendering_pipeline.md`](rendering_pipeline.md) | rendering infra |
+| `docs/manuscript/config.yaml` is the single source of run policy | [`rendering_pipeline.md`](rendering_pipeline.md) | rendering infra |
 | Deterministic outputs (fixed seeds); everything in `output/` regeneratable | [`output_conventions.md`](output_conventions.md) | reproducibility checks |
 
 **2. As a fork seed for a new project.** Minimum viable steps:
@@ -71,15 +76,15 @@ uv run python scripts/audit/copy_exemplar.py \
 cd "projects/working/$NEW"
 # 1. Rewrite src/ with your domain logic (keep the pure-function, infra-free shape)
 # 2. Replace tests/ — real-data tests, no mocks, drive src/ coverage ≥90%
-# 3. Edit manuscript/config.yaml (title, authors, thresholds) — the only policy knob
-# 4. Replace manuscript/*.md with your narrative; keep {{TOKEN}} + figure-label conventions
+# 3. Edit docs/manuscript/config.yaml (title, authors, thresholds) — the only policy knob
+# 4. Replace docs/manuscript/*.md with your narrative; keep {{TOKEN}} + figure-label conventions
 # 5. Point scripts/ at your src/ functions (thin orchestrators only)
 uv run pytest "projects/working/$NEW/tests/" --cov="projects/working/$NEW/src" --cov-fail-under=90
 uv run python scripts/runner/execute_pipeline.py --project "working/$NEW" --mode core
 ```
 
 Then the project is discovered automatically (`discover_projects()`); the
-repo-level guide [`docs/guides/new-project-setup.md`](../../../../docs/guides/new-project-setup.md)
+repo-level guide [`docs/guides/new-project-setup.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/new-project-setup.md)
 covers the full workflow.
 
 **Prerequisites to know before referencing the render path:** combined-PDF
@@ -100,20 +105,20 @@ differ only in what `src/` computes and what the pipeline checks.
 
 ```bash
 # Tests pass + coverage ≥90%
-uv run pytest projects/templates/template_code_project/tests/ \
-    --cov=projects/templates/template_code_project/src --cov-fail-under=90 -q
+uv run pytest tests/ \
+    --cov=src --cov-fail-under=90 -q
 
 # No mocks in tests/
-grep -r "unittest.mock\|MagicMock\|@patch" projects/templates/template_code_project/tests/ || echo "Clean"
+grep -r "unittest.mock\|MagicMock\|@patch" tests/ || echo "Clean"
 
 # src/ has no infrastructure imports
-grep -r "from infrastructure\|import infrastructure" projects/templates/template_code_project/src/ || echo "Clean"
+grep -r "from infrastructure\|import infrastructure" src/ || echo "Clean"
 ```
 
 ## See Also
 
 - [../AGENTS.md](../AGENTS.md) — Full project documentation (API reference, known issues, complete directory map)
 - [../README.md](../README.md) — Project quick start
-- [../manuscript/AGENTS.md](../manuscript/AGENTS.md) — Manuscript directory rules and `{{VARIABLE}}` protocol
+- [../manuscript/AGENTS.md](manuscript/AGENTS.md) — Manuscript directory rules and `{{VARIABLE}}` protocol
 - [output_conventions.md](output_conventions.md) — Output directory structure and regeneration
-- [../../../docs/](../../../../docs/) — Repository-level documentation hub (measured file/subdirectory counts live in `docs/_generated/COUNTS.md`)
+- [../../../docs/](https://github.com/docxology/template/tree/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/) — Repository-level documentation hub (measured file/subdirectory counts live in `docs/_generated/COUNTS.md`)

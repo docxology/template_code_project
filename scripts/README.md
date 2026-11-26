@@ -51,11 +51,11 @@ ls -la ../output/data/
 
 Full API and smoke-test notes: [`AGENTS.md`](AGENTS.md).
 
-`manuscript/config.yaml` declares the analysis order: optimization,
+`docs/manuscript/config.yaml` declares the analysis order: optimization,
 benchmark, dashboard, API documentation, then manuscript variables.
 Optional connector and provenance stages use the repository's canonical
 orchestrators when explicitly requested; see
-[`pipeline.yaml`](../../../../infrastructure/core/pipeline/pipeline.yaml).
+[`pipeline.yaml`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/infrastructure/core/pipeline/pipeline.yaml).
 
 ## Architecture
 

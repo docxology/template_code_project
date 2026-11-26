@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Connector search pipeline stage.
 
-Reads the ``connector_search:`` block from ``manuscript/config.yaml`` and,
+Reads the ``connector_search:`` block from ``docs/manuscript/config.yaml`` and,
 when enabled, runs queries across the configured scientific-database
 connectors, writing results to ``output/data/connector_search/``.
 
@@ -22,6 +22,7 @@ sys.path.insert(0, str(REPO_ROOT))
 import yaml  # noqa: E402
 
 from infrastructure.core.logging.utils import get_logger  # noqa: E402
+from infrastructure.core.project_paths import resolve_source_manuscript_dir  # noqa: E402
 from infrastructure.search.connectors.config import load_connector_search_config  # noqa: E402
 from infrastructure.search.connectors import list_connectors, search_connector  # noqa: E402
 
@@ -38,14 +39,14 @@ def main() -> int:
     cfg = load_connector_search_config(PROJECT_DIR)
     connector_ids = cfg.enabled_connectors or [entry.name for entry in list_connectors()]
 
-    manuscript_config_path = PROJECT_DIR / "manuscript" / "config.yaml"
+    manuscript_config_path = resolve_source_manuscript_dir(PROJECT_DIR) / "config.yaml"
     queries: list[str] = []
     if manuscript_config_path.exists():
         manuscript_cfg = yaml.safe_load(manuscript_config_path.read_text(encoding="utf-8")) or {}
         queries = [str(k) for k in manuscript_cfg.get("keywords", [])]
 
     if not queries:
-        logger.warning("[skip] manuscript/config.yaml has no keywords — no queries to run")
+        logger.warning("[skip] docs/manuscript/config.yaml has no keywords — no queries to run")
         return 0
 
     output_dir = PROJECT_DIR / "output" / "data" / "connector_search"

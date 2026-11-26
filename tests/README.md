@@ -37,7 +37,7 @@ All test files live in cluster subdirectories mirroring
 | `test_scripts_smoke.py` | Auxiliary scripts (`generate_api_docs.py`, `00_preflight.py`) |
 | `test_documentation.py` | `core/documentation.py` API reference helpers |
 
-Live test count and coverage: [`docs/_generated/COUNTS.md`](../../../../docs/_generated/COUNTS.md).
+Live test count and coverage: [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md).
 
 ## Architecture
 

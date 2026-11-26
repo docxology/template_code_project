@@ -1,6 +1,6 @@
 # Output Directory Conventions
 
-The project-relative `output/` directory (`projects/templates/template_code_project/output/`) holds all generated artifacts from the analysis pipeline. This document describes its structure, regeneration process, and version-control policy.
+The project-relative `output/` directory (`output/`) holds all generated artifacts from the analysis pipeline. This document describes its structure, regeneration process, and version-control policy.
 
 ## Directory Purpose
 
@@ -8,7 +8,7 @@ The project-relative `output/` directory (`projects/templates/template_code_proj
 
 **Key principle:** The source of truth for all outputs is the combination of:
 - `src/template_code_project/core/optimizer.py` (pure mathematical logic)
-- `manuscript/config.yaml` (experiment parameters)
+- `docs/manuscript/config.yaml` (experiment parameters)
 - `scripts/optimization_analysis.py` (orchestration)
 - `scripts/z_generate_manuscript_variables.py` (token substitution)
 
@@ -43,36 +43,14 @@ flowchart TB
 
 ## Regeneration Sequence
 
-If any artifact becomes corrupted or you change the analysis, follow this sequence:
+Use the [quick start](quickstart.md) to generate a fresh bundle in a disposable
+clone. The standalone checkout tracks a publication snapshot, so keep the
+fresh render in the pinned template's working checkout until review.
 
-1. **Clean (optional)**: Delete the entire `output/` directory to start fresh.
-   ```bash
-   rm -rf projects/templates/template_code_project/output/
-   ```
-
-2. **Run analysis pipeline** — generates figures, data, reports, dashboard, and registers figures.
-   ```bash
-   uv run python projects/templates/template_code_project/scripts/optimization_analysis.py
-   ```
-   **Outputs**: `figures/`, `data/`, `reports/`, `citations/`, `manuscript/`
-
-3. **Hydrate manuscript variables** — substitutes `{{VARIABLE}}` tokens in all manuscript templates (strict: requires analysis CSV unless `--allow-draft`).
-   ```bash
-   uv run python projects/templates/template_code_project/scripts/z_generate_manuscript_variables.py
-   ```
-   **Outputs**: updates `output/manuscript/*.md` (resolved copies) and writes `output/data/manuscript_variables.json`
-
-4. **Render PDF** — converts substituted markdown to PDF via Pandoc/LaTeX.
-   ```bash
-   uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
-   ```
-   **Outputs**: `pdf/`, `slides/`, `web/`
-
-5. **Copy final deliverables** — copies PDF and figures to `output/templates/template_code_project/` (used by CI).
-   ```bash
-   uv run python scripts/pipeline/stage_05_copy.py --project templates/template_code_project
-   ```
-   **Outputs**: final deliverables at repository-level `output/templates/template_code_project/`
+The analysis writes `output/figures/`, `output/data/`, `output/reports/`, and
+`output/citations/`. Manuscript hydration writes the resolved sections to
+`output/manuscript/`. The pinned Stage 03 creates the configured publication
+formats and Stage 04 writes the validation report.
 
 ## Version-Control Policy
 
@@ -92,7 +70,7 @@ To add a new figure or data product:
 1. **Add the generator** in `src/template_code_project/figures/` and wire it through `src/template_code_project/analysis/` (script entry: `scripts/optimization_analysis.py`) — write to `output/figures/` or `output/data/` with a fixed, predictable filename.
 2. **Update `docs/output_inventory.md`** — add an entry to the file inventory table (see below).
 3. **Update manuscript references** — reference the new file via `\\ref{fig:label}` or data table as appropriate.
-4. **Re-run the pipeline** (steps 2–5 above).
+4. **Re-run the pipeline** using the [quick start](quickstart.md).
 
 ## File Inventory Template (for `docs/output_inventory.md`)
 
@@ -116,6 +94,6 @@ To add a new figure or data product:
 
 ## See Also
 
-- [`manuscript/AGENTS.md`](../manuscript/AGENTS.md) — Manuscript modification protocol and token system
+- [`docs/manuscript/AGENTS.md`](manuscript/AGENTS.md) — Manuscript modification protocol and token system
 - [`rendering_pipeline.md`](rendering_pipeline.md) — Full 4-phase pipeline description
 - [`syntax_guide.md`](syntax_guide.md) — Figure references and `{{VARIABLE}}` syntax

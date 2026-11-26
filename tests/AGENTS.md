@@ -58,7 +58,7 @@ cd projects/templates/template_code_project
 uv run pytest tests/ --cov=src --cov-fail-under=90
 
 # From repo root (CI parity; same modules, project-relative coverage config):
-uv run pytest projects/templates/template_code_project/tests/ \
+uv run pytest tests/ \
   --cov=projects/templates/template_code_project/src --cov-fail-under=90
 ```
 
