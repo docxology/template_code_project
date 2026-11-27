@@ -98,17 +98,17 @@ Scripts use hardcoded parameters for reproducibility:
 
 ## Testing
 
-Scripts are tested through the project test suite:
+Run the script tests from the standalone checkout root after the [quick start](../docs/quickstart.md).
 
 ```bash
 # Run all project tests (includes script integration tests)
-uv run pytest ../tests/ -v
+uv run --locked --extra dev pytest tests/ -v
 
 # Run specific analysis tests
-uv run pytest ../tests/analysis/test_analysis_integration.py -k "TestStabilityAnalysis or TestPerformanceBenchmarking" -v
+uv run --locked --extra dev pytest tests/analysis/test_analysis_integration.py -k "TestStabilityAnalysis or TestPerformanceBenchmarking" -v
 
 # Auxiliary script smoke (non-gated AESTHETIC scripts)
-uv run pytest ../tests/analysis/test_scripts_smoke.py -v
+uv run --locked --extra dev pytest tests/analysis/test_scripts_smoke.py -v
 ```
 
 **Auxiliary smoke coverage:** [`tests/analysis/test_scripts_smoke.py`](../tests/analysis/test_scripts_smoke.py) subprocess-invokes `generate_api_docs.py` (expects exit 0 and `output/docs/api_reference.md`) and `00_preflight.py` (accepts exit 0 or 1 when the local Puppeteer cache is absent; asserts actionable preflight diagnostics). Neither script is pipeline-required.

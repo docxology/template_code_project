@@ -46,13 +46,12 @@ This sequence is intentional. Each document provides context that the next docum
 
 ## Verification Commands
 
-These three commands verify the most critical constraints. Run all three before submitting any change:
+Complete the [standalone quick start](quickstart.md) and run all three commands
+from the checkout root before submitting a change.
 
 ```bash
 # Test suite passes + coverage ≥90%
-uv run pytest tests/ \
-    --cov=projects/templates/template_code_project/src \
-    --cov-fail-under=90 -q
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 
 # No mocks in tests/
 grep -r "unittest.mock\|MagicMock\|@patch\|create_autospec" \

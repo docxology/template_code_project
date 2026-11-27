@@ -105,10 +105,11 @@ differ only in what `src/` computes and what the pipeline checks.
 
 ## Verification Commands
 
+Run these commands from the standalone checkout root after the [quick start](quickstart.md).
+
 ```bash
 # Tests pass + coverage ≥90%
-uv run pytest tests/ \
-    --cov=src --cov-fail-under=90 -q
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 
 # No mocks in tests/
 grep -r "unittest.mock\|MagicMock\|@patch" tests/ || echo "Clean"
