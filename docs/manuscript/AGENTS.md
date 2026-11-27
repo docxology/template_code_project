@@ -109,7 +109,7 @@ Follow these steps in order whenever you change behavior and need to update the 
 > **PDF Rendering** stage fails while per-section slides still render. Full
 > detail: [`../docs/rendering_pipeline.md`](../rendering_pipeline.md#prerequisite-mermaid-diagrams-need-chrome-headless-shell).
 
-Final deliverables appear under `output/templates/template_code_project/` after `scripts/pipeline/stage_05_copy.py` runs (working files remain under `output/` during the run).
+Stage 05 copies final deliverables to `output/<project-selector>/` in the Template checkout. The built-in exemplar uses `templates/template_code_project` and the standalone registration uses `working/template_code_project`. Working files remain under the project’s own `output/`.
 
 ## RASP Conventions
 

@@ -43,7 +43,7 @@ Paths in the table are relative to `projects/templates/template_code_project/`.
 | `output/pdf/_combined_manuscript.{tex,aux,log}` | LaTeX intermediates | `xelatex` via Pandoc | 5 — Render PDF |
 | `output/logs/*.log` | Per-stage pipeline logs | `scripts/runner/execute_pipeline.py` | every stage |
 
-The repo-level `output/templates/template_code_project/` (written by `scripts/pipeline/stage_05_copy.py` at stage 9) is the **public-facing deliverables tree** consumed by CI artifact upload and the multi-project executive report.
+Within the Template checkout, Stage 05 mirrors the built-in exemplar to `output/templates/template_code_project/`. Use `output/working/template_code_project/` for a standalone checkout registered with the `working/template_code_project` alias.
 
 ## Manuscript Artifact-Count Contract
 
@@ -94,7 +94,7 @@ uv run python scripts/z_generate_manuscript_variables.py
 # 4. Render PDF (produces pdf/, slides/, web/)
 uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
 
-# 5. Copy final deliverables to repo-level output/ (stage 9)
+# 5. Copy final deliverables to the Template checkout output/ (Stage 05)
 uv run python scripts/pipeline/stage_05_copy.py --project templates/template_code_project
 ```
 

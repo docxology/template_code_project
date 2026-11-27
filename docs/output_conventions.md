@@ -54,7 +54,7 @@ formats and Stage 04 writes the validation report.
 
 ## Version-Control Policy
 
-- **Project `output/` is tracked for this public exemplar** when files stay below the 50 MB public output ceiling. Curated public deliverables are also copied to the repo-level `output/templates/template_code_project/` tree by `scripts/pipeline/stage_05_copy.py`.
+- **Project `output/` is tracked for this public exemplar** when files stay below the 50 MB public output ceiling. In the Template checkout, Stage 05 copies the built-in exemplar to `output/templates/template_code_project/` and a standalone `working/template_code_project` registration to `output/working/template_code_project/`.
 
 - **Do not edit files in `output/` manually** — changes will be overwritten on the next pipeline run.
 
