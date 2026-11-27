@@ -95,9 +95,10 @@ Follow these steps in order whenever you change behavior and need to update the 
    ```bash
    grep -r "{{" output/manuscript/ || echo "All resolved"
    ```
-6. **Render PDF** from the repository root:
+6. **Render PDF** from the pinned Template checkout root using the
+   [standalone rendering route](../rendering_pipeline.md#pdf-render).
    ```bash
-   uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
+   uv run --no-sync python scripts/pipeline/stage_03_render.py --project working/template_code_project
    ```
 7. **Verify figures and table appear** in the rendered PDF; check `output/tex/*.log` for LaTeX errors.
 
