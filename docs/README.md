@@ -65,7 +65,10 @@ project, mirror these invariants — they are what the repo's gates enforce:
 | `docs/manuscript/config.yaml` is the single source of run policy | [`rendering_pipeline.md`](rendering_pipeline.md) | rendering infra |
 | Deterministic outputs (fixed seeds); everything in `output/` regeneratable | [`output_conventions.md`](output_conventions.md) | reproducibility checks |
 
-**2. As a fork seed for a new project.** Minimum viable steps:
+**2. As a fork seed for a new project.** Run these commands from the root
+of the [pinned Template checkout](https://github.com/docxology/template/tree/87704feae0a4490ef7dad9c931d268e8c30273c2).
+Edit the generated files under `projects/working/$NEW` and run the
+validation commands from the same Template root.
 
 ```bash
 NEW=my_project
@@ -73,7 +76,6 @@ uv run python scripts/audit/copy_exemplar.py \
   --source templates/template_code_project \
   --dest "projects/working/$NEW" \
   --new-name "$NEW"
-cd "projects/working/$NEW"
 # 1. Rewrite src/ with your domain logic (keep the pure-function, infra-free shape)
 # 2. Replace tests/ — real-data tests, no mocks, drive src/ coverage ≥90%
 # 3. Edit docs/manuscript/config.yaml (title, authors, thresholds) — the only policy knob

@@ -109,7 +109,7 @@ your changes introduced into the shipped templates.
 
 ## Sibling exemplar
 
-[`template_prose_project`](../../template_prose_project) is the
+[`template_prose_project`](https://github.com/docxology/template_prose_project) is the
 prose-review sibling — same shape, no algorithm, validates a manuscript
 instead of analyzing it. If your work is editorial rather than
 numerical, fork that one instead.
