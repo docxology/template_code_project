@@ -96,7 +96,13 @@ flowchart TB
 
 ## Installation/Setup
 
-Install dependencies from the **repository root** with `uv sync` (see root [`pyproject.toml`](https://github.com/docxology/template/blob/main/pyproject.toml)). The root `[tool.uv.workspace]` has `members = []`, so this directory is not a separate uv workspace package; [`projects/templates/template_code_project/pyproject.toml`](pyproject.toml) still pins **pytest/coverage** settings, documents the project name, and lists scientific dependencies used when running tools against this tree in isolation.
+Run the [standalone quick start](docs/quickstart.md) from this checkout. The
+local [project configuration](pyproject.toml) supports Python 3.12 and later.
+It defines the test tooling in the `dev` extra and the project coverage gate.
+The quick start prepares a separate pinned Template checkout on Python 3.14
+and exports its path for analysis and integration tests.
+
+The basic optimizer example below uses only the standalone project and NumPy.
 
 ## Usage Examples
 
@@ -104,10 +110,7 @@ Install dependencies from the **repository root** with `uv sync` (see root [`pyp
 
 ```python
 from template_code_project.core.optimizer import gradient_descent, quadratic_function, compute_gradient
-from infrastructure.core.logging.utils import get_logger
 import numpy as np
-
-logger = get_logger(__name__)
 
 # Run gradient descent
 result = gradient_descent(
@@ -117,16 +120,15 @@ result = gradient_descent(
     step_size=0.1,
     tolerance=1e-6
 )
-logger.info("Solution: %s, Converged: %s", result.solution, result.converged)
-logger.info("Iterations: %s, Final objective: %s", result.iterations, result.objective_value)
+print(result.solution, result.converged, result.iterations, result.objective_value)
 ```
 
 ### Analysis Pipeline
 
 ```bash
-# From repository root — execute the full analysis pipeline
+# From the standalone checkout after preparing the pinned Template
 uv run python scripts/optimization_analysis.py
-# Writes figures, data, reports, and dashboard under output/
+# Writes figures, data and reports under output/
 ```
 
 ### Manuscript variable hydration (strict default)
@@ -171,18 +173,18 @@ overlays are validation inputs only; they do not execute autonomous agents.
 
 **Critical Directive**: Before modifying this project, AI agents *must* reference the specific behavioral rules laid out in the `docs/` folder:
 
-- Start with `projects/templates/template_code_project/docs/agent_instructions.md` to understand operational constraints.
-- Consult `projects/templates/template_code_project/docs/testing_philosophy.md` before writing or modifying any `pytest` files.
-- Consult `projects/templates/template_code_project/docs/architecture.md` before altering `scripts/` or `src/` modular boundaries.
+- Start with [agent instructions](docs/agent_instructions.md).
+- Consult the [testing guide](docs/testing_philosophy.md) before writing or modifying tests.
+- Consult the [architecture guide](docs/architecture.md) before altering `scripts/` or `src/` boundaries.
 
 ## Testing
 
 ```bash
 # Run project tests
-uv run pytest tests/ -v
+uv run --locked --extra dev pytest tests/ -v
 
 # With coverage
-uv run pytest tests/ --cov=projects/templates/template_code_project/src --cov-report=html
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-report=html
 ```
 
 ## API Reference
@@ -311,9 +313,8 @@ Thin wrapper → [`src/template_code_project/core/documentation.py`](src/templat
 
 ### Common Issues
 
-- **Import Errors**: Ensure the project is run from the template root directory
-- **Missing Dependencies**: Run `uv sync` to install dependencies
-- **Test Failures**: Check that numpy/scipy are properly installed
+- Check that commands run from this checkout with the pinned Template path exported as shown in the [quick start](docs/quickstart.md).
+- Install the local test dependencies with `uv sync --locked --extra dev`.
 
 ### Known Issues / Learnings
 
@@ -374,10 +375,7 @@ This project complies with the template development standards in the root **[`AG
 
 ```bash
 # Test coverage verification
-uv run pytest tests/ --cov=projects/templates/template_code_project/src --cov-fail-under=90
-
-# Type hint verification (same project source surface used by CI)
-uv run mypy projects/templates/template_code_project/src
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 
 # Documentation completeness check
 find . -name "*.py" -exec grep -L '"""' {} \;
