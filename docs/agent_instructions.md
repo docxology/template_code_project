@@ -27,12 +27,10 @@ Reading order is mandatory, not advisory. Each document gates a category of acti
 
 The test suite spans `test_optimizer.py` (pure math), `test_analysis_integration.py` (orchestration), `test_analysis_coverage.py` (orchestration branches and error paths), `test_experiment_config.py`, `test_figures_orchestration.py`, `test_dashboard_config.py`, `test_invariants.py`, `test_invariants_and_dashboard.py`, `test_manuscript_variables.py`, `test_documentation.py` (API doc helpers), and `test_scripts_smoke.py` (auxiliary script smoke). Both the project `pyproject.toml` and the root pipeline gate coverage at **90%**. Live test count + current coverage percentage live in [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md) — do not hardcode either number in prose, because both drift faster than the docs touching them.
 
-Before modifying `src/template_code_project/core/optimizer.py`, count the existing tests for the function you are changing. After modifying, run:
+Before modifying `src/template_code_project/core/optimizer.py`, count the existing tests for the function you are changing. After modifying, run the coverage gate from the standalone checkout root. Set up the environment with the [quick start](quickstart.md).
 
 ```bash
-uv run pytest tests/ \
-    --cov=projects/templates/template_code_project/src \
-    --cov-fail-under=90 \
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90 \
     --cov-report=term-missing \
     -v
 ```
@@ -132,13 +130,11 @@ See [`output_conventions.md`](output_conventions.md) for the complete regenerati
 
 ## Verification Checklist
 
-Run all three commands before submitting any change to this project:
+Run all three commands from the standalone checkout root before submitting a change.
 
 ```bash
 # 1. Tests pass and coverage gate is met
-uv run pytest tests/ \
-    --cov=projects/templates/template_code_project/src \
-    --cov-fail-under=90 -q
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 
 # 2. No mocks exist anywhere in tests/
 grep -r "unittest.mock\|MagicMock\|@patch\|create_autospec" \

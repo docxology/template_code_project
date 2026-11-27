@@ -130,11 +130,9 @@ Make sure `~/.local/bin` (or the install location) is on your `PATH`.
 
 **Fix.**
 
-1. Find which lines are uncovered:
+1. Find which lines are uncovered from the standalone checkout root.
    ```bash
-   uv run pytest tests/ \
-       --cov=projects/templates/template_code_project/src \
-       --cov-report=term-missing -v
+   uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-report=term-missing -v
    ```
 2. Add tests covering the missing branches.
 3. Re-run until coverage ≥ 90% and all tests pass.
@@ -154,16 +152,16 @@ uv run python scripts/optimization_analysis.py
 **Cause.** Performance benchmarks use real timing with multiple
 repetitions; on a slow machine they can dominate the suite.
 
-**Fix.** Skip them for fast iteration:
+**Fix.** From the standalone checkout root, skip them for fast iteration.
 
 ```bash
-uv run pytest tests/ -k "not Performance"
+uv run --locked --extra dev pytest tests/ -k "not Performance"
 ```
 
-Or run the suite in parallel:
+For a parallel run, include pytest-xdist.
 
 ```bash
-uv run pytest tests/ -n auto
+uv run --locked --extra dev --with pytest-xdist pytest tests/ -n auto
 ```
 
 ## YAML parse error in `docs/manuscript/config.yaml`
@@ -221,29 +219,24 @@ coverage shown in the repo canonical facts.
 
 **Cause:** the aggregate runner resolves the interpreter from
 `projects/templates/template_code_project/.venv`. A `.venv` made by `uv venv` without
-`uv sync` lacks `pytest`, so pytest collects nothing. **A green exit with
+`uv sync --extra dev` lacks `pytest`, so pytest collects nothing. **A green exit with
 zero collected tests is not a pass.**
 
 **Fixes:**
 
-1. Run the **canonical per-project gate** directly (authoritative; what CI
-   enforces project-by-project):
+1. Run the coverage gate directly from the standalone checkout root.
    ```bash
-   uv run pytest tests/ \
-     --cov=projects/templates/template_code_project/src --cov-fail-under=90
+   uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
    ```
-2. Or `uv sync` so the per-project `.venv` has the test deps.
+2. For the parent Template runner, install the test dependencies in the
+   exemplar directory with `uv sync --extra dev`.
 3. Always confirm **collected > 0 AND coverage ≥ 90%** — never exit code
    alone. (The runner now falls back to the workspace interpreter and
    hard-fails a 0-collected or below-threshold run.)
 
-**Coverage-config note:** the project's `pyproject.toml` `[tool.coverage]`
-`source`/`omit` are *project-relative* and do not resolve when pytest runs
-from the repo root; the canonical command and the runner both measure
-against the **repo-root** `pyproject.toml` config — that is the number the
-90% gate enforces (missing-cells coverage below the floor fails pytest itself via `--cov-fail-under`, it never warns) (≈99% for this exemplar; `src/template_code_project/analysis/` and
-Dropping below it fails the gate outright; deliberate omissions are recorded in the repo-root coverage configuration.
-`src/template_code_project/dashboard/dashboard.py` are intentionally omitted there).
+In the standalone checkout, coverage paths are relative to the project root
+and come from [`pyproject.toml`](../pyproject.toml). For parent Template
+validation, see the [fork guide](standalone.md#validation-commands).
 
 ## See also
 

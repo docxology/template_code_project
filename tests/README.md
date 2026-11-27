@@ -4,10 +4,11 @@ An uncompromising validation layer for the mathematical algorithms and orchestra
 
 ## Quick Start
 
+Complete the [quick start](../docs/quickstart.md) and run these commands from the standalone checkout root.
+
 ```bash
-cd projects/templates/template_code_project
-uv run pytest tests/ -v
-uv run pytest tests/ --cov=src --cov-fail-under=90
+uv run --locked --extra dev pytest tests/ -v
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 ```
 
 ## Key Features

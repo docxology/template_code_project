@@ -56,9 +56,10 @@ x_star, f_star = quadratic_optimum(cfg.A_array(), cfg.b_array())
 
 ### Run Tests
 
+Run this from the standalone checkout root after the [quick start](../../docs/quickstart.md).
+
 ```bash
-cd projects/templates/template_code_project
-uv run pytest tests/ --cov=src --cov-fail-under=90
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 ```
 
 ## Architecture

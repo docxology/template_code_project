@@ -38,48 +38,46 @@ Tests require the same dependencies as the main code:
 
 ## Usage Examples
 
+Complete the [quick start](../docs/quickstart.md) and run these examples from
+the standalone checkout root. See the [standalone fork guide](../docs/standalone.md#validation-commands) for parent Template commands.
+
 ### Run All Tests
 
 ```bash
 # From tests directory
-uv run pytest .
+(cd tests && uv run --locked --extra dev pytest .)
 
 # From project root
-uv run pytest tests/
+uv run --locked --extra dev pytest tests/
 
 # With verbose output
-uv run pytest tests/ -v
+uv run --locked --extra dev pytest tests/ -v
 
 # With coverage (local HTML exploration)
-uv run pytest tests/ --cov=../src --cov-report=html
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-report=html
 
-# Canonical enforced gate (from project directory — authoritative for full src/ coverage):
-cd projects/templates/template_code_project
-uv run pytest tests/ --cov=src --cov-fail-under=90
-
-# From repo root (CI parity; same modules, project-relative coverage config):
-uv run pytest tests/ \
-  --cov=projects/templates/template_code_project/src --cov-fail-under=90
+# Enforced coverage gate
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 ```
 
 ### Run Specific Test Classes
 
 ```bash
 # Test quadratic function evaluation
-uv run pytest tests/ -k "TestQuadraticFunction"
+uv run --locked --extra dev pytest tests/ -k "TestQuadraticFunction"
 
 # Test gradient computation
-uv run pytest tests/ -k "TestComputeGradient"
+uv run --locked --extra dev pytest tests/ -k "TestComputeGradient"
 
 # Test optimization algorithm
-uv run pytest tests/ -k "TestGradientDescent"
+uv run --locked --extra dev pytest tests/ -k "TestGradientDescent"
 ```
 
 ### Debug Individual Tests
 
 ```bash
 # Run single test with debug output
-uv run pytest tests/core/test_optimizer_gradient_descent.py::TestGradientDescent::test_convergence_to_optimum -v -s
+uv run --locked --extra dev pytest tests/core/test_optimizer_gradient_descent.py::TestGradientDescent::test_convergence_to_optimum -v -s
 ```
 
 ## Configuration
@@ -232,13 +230,13 @@ class TestOptimizationResult:
 Enable detailed test output:
 
 ```bash
-uv run pytest tests/ -v -s --tb=long
+uv run --locked --extra dev pytest tests/ -v -s --tb=long
 ```
 
 Check test coverage:
 
 ```bash
-uv run pytest tests/ --cov=../src --cov-report=term-missing
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-report=term-missing
 ```
 
 ## Best Practices

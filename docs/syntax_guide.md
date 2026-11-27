@@ -165,7 +165,7 @@ def example() -> bool:
 
 For shell commands:
 ```bash
-uv run pytest tests/ -v
+uv run --locked --extra dev pytest tests/ -v
 ```
 
 For inline code referencing file paths, use single backticks: `src/template_code_project/core/optimizer.py`

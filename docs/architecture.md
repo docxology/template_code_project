@@ -81,7 +81,7 @@ Follow these five steps in order:
 
 1. **Add the function to `src/template_code_project/core/optimizer.py`** — Pure math only; no I/O; add type hints and a Google-style docstring; export from `__init__.py`.
 
-2. **Write a test class in `tests/core/test_optimizer.py`** — Follow the zero-mock pattern; use fixed numpy arrays; assert mathematical properties; run `uv run pytest tests/ --cov=projects/templates/template_code_project/src --cov-fail-under=90`.
+2. **Write a test class in `tests/core/test_optimizer.py`** — Use fixed NumPy arrays and assert mathematical properties with the zero-mock pattern. From the standalone checkout root, run `uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90`.
 
 3. **Add the analysis call in `src/template_code_project/analysis/`** — Import the new function from `src/template_code_project/core/optimizer.py`; run it inside the existing experiment loop or add a new loop; write results to `output/data/` or `output/figures/`.
 

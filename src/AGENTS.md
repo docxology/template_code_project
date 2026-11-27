@@ -176,15 +176,17 @@ The optimization algorithms support configuration through function parameters:
 
 ## Testing
 
+Run these commands from the standalone checkout root after the [quick start](../docs/quickstart.md).
+
 ```bash
-# Run all tests for this module
-uv run pytest ../tests/ -v
+# Run the project tests
+uv run --locked --extra dev pytest tests/ -v
 
 # Run specific test classes
-uv run pytest ../tests/ -k "TestQuadraticFunction"
+uv run --locked --extra dev pytest tests/ -k "TestQuadraticFunction"
 
 # Run with coverage
-uv run pytest ../tests/ --cov=. --cov-report=html
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-report=html
 ```
 
 ## API Reference

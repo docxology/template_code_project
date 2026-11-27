@@ -23,7 +23,10 @@ Project-scoped skill for the in-repo exemplar at
 ## Quick Reference
 
 ```bash
-# From the repository root
+# From the standalone checkout root after the standalone quick start
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
+
+# From the parent Template checkout root
 uv run pytest projects/templates/template_code_project/tests --cov=projects/templates/template_code_project/src --cov-fail-under=90
 uv run python scripts/pipeline/stage_02_analysis.py --project templates/template_code_project
 uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project

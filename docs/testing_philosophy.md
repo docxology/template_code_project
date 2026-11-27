@@ -24,11 +24,11 @@ If you ever feel the urge to mock something in a test for `src/`, treat it as a 
 | `test_invariants_and_dashboard.py` | `scripts/build_dashboard.py` end-to-end |
 | `test_manuscript_variables.py` | `{{TOKEN}}` map + live manuscript cross-reference |
 
-Configuration: `projects/templates/template_code_project/pyproject.toml` (`fail_under = 90`, matching the root pipeline gate)
+The [standalone coverage configuration](../pyproject.toml) and the parent Template pipeline use the same 90% floor.
 
 Conftest: `tests/conftest.py` (sets `MPLBACKEND=Agg`, adds `src/` to `sys.path`)
 
-Live test count and coverage percentage: [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md) (or `uv run pytest tests/ --collect-only -q` from the project directory).
+To count collected tests from the standalone checkout root, run `uv run --locked --extra dev pytest tests/ --collect-only -q`. The parent Template records live test counts and coverage in [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md).
 
 ## Test Class Inventory (core math — `test_optimizer.py`)
 
@@ -69,11 +69,10 @@ omit = ["tests/*", "*/__init__.py", "*/test_*.py"]
 fail_under = 90
 ```
 
-Authoritative gate (measures all of `src/`, including orchestration modules):
+Run the coverage gate from the standalone checkout root after the [quick start](quickstart.md).
 
 ```bash
-cd projects/templates/template_code_project
-uv run pytest tests/ --cov=src --cov-report=term-missing --cov-fail-under=90
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90 --cov-report=term-missing
 ```
 
 ## Zero-Mock Checklist
@@ -110,8 +109,7 @@ Orchestration modules (`analysis/`, `dashboard/dashboard.py`, `figures/`, `core/
 A green exit code is **not** proof the suite ran. Confirm **N collected > 0 AND coverage ≥ 90%**.
 
 ```bash
-cd projects/templates/template_code_project
-uv run pytest tests/ --cov=src --cov-fail-under=90 -q
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90 -q
 ```
 
 See [`troubleshooting.md`](troubleshooting.md#tests-report-passed-but-ran-0-tests--00-coverage).
