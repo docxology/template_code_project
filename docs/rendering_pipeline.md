@@ -88,7 +88,9 @@ uv run python scripts/z_generate_manuscript_variables.py
 
 ### PDF render
 
-**Script**: `scripts/pipeline/stage_03_render.py` (at repository root, **not** inside `projects/`)
+Run these Template stages from the pinned Template checkout root. The commands below assume the standalone checkout is registered as `working/template_code_project`.
+
+**Script**: `scripts/pipeline/stage_03_render.py`
 
 **Command**:
 ```bash
@@ -111,22 +113,22 @@ Zenodo and GitHub uploads use a metadata-driven basename from `publication.depos
 | `infrastructure/core/config/loader.py` | Reads `docs/manuscript/config.yaml` for title, authors, metadata |
 
 **Outputs**:
-- `output/pdf/template_code_project_combined.pdf` — working publication PDF
-- `output/templates/template_code_project/pdf/template_code_project_combined.pdf` — copied final publication PDF after Stage 07
+- `projects/working/template_code_project/output/pdf/template_code_project_combined.pdf` — working publication PDF, under the registered project
+- `output/working/template_code_project/pdf/template_code_project_combined.pdf` — delivery copy after Stage 05, under the Template root
 - `output/pdf/_combined_manuscript.*` — LaTeX intermediates (`.tex`, `.aux`, `.log`)
 - `output/slides/` — per-section Beamer slide PDFs (one per manuscript section)
 - `output/web/` — HTML versions of each section
 
 ### Copy deliverables in the upstream template
 
-**Script**: `scripts/pipeline/stage_05_copy.py` (at repository root)
+**Script**: `scripts/pipeline/stage_05_copy.py` (at the pinned Template checkout root)
 
 **Command**:
 ```bash
 uv run python scripts/pipeline/stage_05_copy.py --project working/template_code_project
 ```
 
-**Output**: Final PDF and figures copied to `output/templates/template_code_project/` at the repository root (used by CI artifact upload and the multi-project executive report).
+**Output**: The final PDF and figures are copied to `output/working/template_code_project/` under the Template checkout. The built-in exemplar uses `--project templates/template_code_project` and copies to `output/templates/template_code_project/`.
 
 ## config.yaml Controls
 
