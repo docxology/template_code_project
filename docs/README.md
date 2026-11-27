@@ -96,7 +96,7 @@ test gate is the **direct** command below (a green `scripts/pipeline/stage_01_te
 
 **Code vs. prose — pick the right reference.** Use **`template_code_project`**
 when the deliverable is computed (algorithms, figures from data, numerical
-results). Use the sibling **[`template_prose_project`](../../template_prose_project/)**
+results). Use the sibling **[`template_prose_project`](https://github.com/docxology/template_prose_project)**
 when the deliverable is editorial (readability/structure/citation review of
 written prose). Both share the identical structural contract above; they
 differ only in what `src/` computes and what the pipeline checks.

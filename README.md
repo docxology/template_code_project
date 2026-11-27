@@ -73,8 +73,7 @@ auto-discover; **IPFS (Web3.Storage)** has no `WEB3_STORAGE_TOKEN` configured.
 
 The [documentation index](docs/README.md) covers setup, the optimizer,
 publication settings, and reuse. Follow the [quick start](docs/quickstart.md)
-for the standalone test suite, numerical analysis, manuscript hydration, and
-rendering and validation with the pinned template.
+for Python 3.12+ standalone setup, the test suite and numerical analysis. The guide also prepares a separate Python 3.14 environment for rendering and validation with the pinned Template.
 
 The maintained manuscript lives in [`docs/manuscript/`](docs/manuscript/README.md).
 Its [configuration](docs/manuscript/config.yaml) selects the experiment and
@@ -126,6 +125,8 @@ regardless of whether their domain is optimization.
 
 ## Common Commands
 
+Run these from the standalone checkout after completing the [quick-start setup](docs/quickstart.md). Use a disposable checkout when regenerating the tracked publication outputs.
+
 ### Run Analysis
 
 ```bash
@@ -147,7 +148,7 @@ step — `optimization_analysis.py` does not build the dashboard itself; see
 ### Run Tests
 
 ```bash
-uv run pytest tests/ -v
+uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 ```
 
 Tests optimization algorithms and numerical accuracy.
