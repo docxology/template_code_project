@@ -1,6 +1,6 @@
 # Code Project - Optimization Research Exemplar
 
-**This is an active project** in the `projects/` directory, discovered and executed by infrastructure discovery functions. Public exemplar roster and comparison: [`projects/AGENTS.md`](https://github.com/docxology/template/blob/main/projects/AGENTS.md#permanent-canonical-exemplars). Publication DOI layout: [`docs/guides/zenodo-doi-strategy.md`](https://github.com/docxology/template/blob/main/docs/guides/zenodo-doi-strategy.md). Manuscript semantics: [`docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/main/docs/guides/manuscript-semantics.md).
+This is the standalone Code Project checkout. Register it as `working/template_code_project` in the pinned Template checkout to run the shared stages. Public exemplar roster and comparison: [`projects/AGENTS.md`](https://github.com/docxology/template/blob/main/projects/AGENTS.md#permanent-canonical-exemplars). Publication DOI layout: [`docs/guides/zenodo-doi-strategy.md`](https://github.com/docxology/template/blob/main/docs/guides/zenodo-doi-strategy.md). Manuscript semantics: [`docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/main/docs/guides/manuscript-semantics.md).
 
 Decision memory and verifier hardening follow [`docs/rules/memory_and_decision_records.md`](https://github.com/docxology/template/blob/main/docs/rules/memory_and_decision_records.md): use nearby `WHY:` comments only for surprising local choices, keep volatile counts generated, and add negative controls for verifier-like gates.
 
@@ -13,7 +13,7 @@ Decision memory and verifier hardening follow [`docs/rules/memory_and_decision_r
 | `scripts/` | Thin orchestrators; may import `infrastructure/` and `src/` |
 | Live counts | Link [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/main/docs/_generated/COUNTS.md); do not hardcode measured test totals or coverage % |
 
-Enforced by `check_project_src_infrastructure_boundary` via `scripts/audit/check_template_drift.py --strict` and `docs/manuscript/layer_contract.yaml`.
+`docs/manuscript/layer_contract.yaml` records this checkout's import allowances. Check the bundled exemplar's boundary from the Template checkout root with `uv run python scripts/audit/check_template_drift.py --project templates/template_code_project --strict`.
 
 ## Overview
 
@@ -44,7 +44,7 @@ A research project exemplifying mathematical optimization algorithms with rigoro
 
 ### Production publishing (`docxology/template_code_project`)
 
-Double publish (Zenodo + GitHub) via `scripts/publish/publish_project_release.py`. Manuscript config enables transmission bookends, steganography profile documentation, and metadata-driven deposit filenames (`Author_2026_Convergence_{hash8}.pdf` — local working PDF remains `template_code_project_combined.pdf`).
+The shared Zenodo and GitHub publisher is `scripts/publish/publish_project_release.py` in the Template checkout. Use the publishing workflow linked below. Manuscript config enables transmission bookends, steganography profile documentation, and metadata-driven deposit filenames (`Author_2026_Convergence_{hash8}.pdf` — local working PDF remains `template_code_project_combined.pdf`).
 
 Current release/DOI records are generated from `docs/manuscript/config.yaml`, `CITATION.cff`, `.zenodo.json`, GitHub, and Zenodo into [`docs/_generated/publication_records.md`](https://github.com/docxology/template/blob/main/docs/_generated/publication_records.md). Do not copy per-version DOI rows here.
 
@@ -70,17 +70,17 @@ Workflow reference: [`docs/guides/publishing-guide.md`](https://github.com/docxo
 
 ```mermaid
 flowchart TB
-    P[projects/templates/template_code_project]
-    P --> SRC[src<br/>Core algorithms · pure logic · no infrastructure imports]
+    P[Standalone Code Project]
+    P --> SRC[src/template_code_project<br/>Core algorithms and declared adapters]
     P --> SC[scripts<br/>Thin orchestrators]
     P --> T[tests]
     P --> DOCS[docs<br/>Agent-facing documentation hub]
-    P --> M[manuscript]
+    DOCS --> M[manuscript]
     P --> OUT[output<br/>Tracked public artifacts · regenerated]
     P --> PY[pyproject.toml<br/>Pytest/coverage config · project metadata]
     P --> DP[domain_profile.yaml · experiment_plan.yaml ·<br/>data/claim_ledger.yaml<br/>advisory controls · evidence validation]
 
-    SRC --> SRC_F["__init__.py · core/ (optimizer · invariants · sweeps ·<br/>experiment_config · project_paths · _runtime ·<br/>benchmark_support · manuscript_variables · documentation) ·<br/>dashboard/ (dashboard · dashboard_payload · dashboard_panels) ·<br/>analysis/ · figures/ (incl. viz_config) ·<br/>STYLE.md · AGENTS.md · README.md"]
+    SRC --> SRC_F["__init__.py · core/ (optimizer · invariants · sweeps ·<br/>experiment_config · project_paths · _runtime ·<br/>benchmark_support · manuscript_variables · documentation) ·<br/>dashboard/ (dashboard · dashboard_payload · dashboard_panels) ·<br/>analysis/ · figures/ (incl. viz_config) ·<br/>AGENTS.md · README.md"]
     SC --> SC_F[optimization_analysis.py · build_dashboard.py ·<br/>00_preflight.py · generate_api_docs.py ·<br/>z_generate_manuscript_variables.py ·<br/>CONVENTIONS.md · AGENTS.md · README.md]
     T --> T_F["conftest.py · core/ (test_optimizer ·<br/>test_optimizer_gradient_descent · test_invariants ·<br/>test_experiment_config · test_benchmark_support ·<br/>test_manuscript_variables · test_documentation) ·<br/>dashboard/ (test_dashboard_config ·<br/>test_invariants_and_dashboard) ·<br/>analysis/ (test_analysis_integration ·<br/>test_analysis_coverage · test_scripts_smoke) ·<br/>figures/ (test_figures_orchestration) ·<br/>PATTERNS.md · AGENTS.md · README.md"]
     DOCS --> DOCS_F[AGENTS.md · README.md · agent_instructions.md ·<br/>architecture.md · testing_philosophy.md ·<br/>rendering_pipeline.md · style_guide.md · syntax_guide.md]

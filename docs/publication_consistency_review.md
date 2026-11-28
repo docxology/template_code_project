@@ -1,11 +1,28 @@
-# Publication consistency review — 2026-10-13
+# Publication consistency review
+
+## Optimization claims
 
 The current source distinguishes converged, iteration-capped and non-finite runs. For a positive-definite quadratic, contraction requires `0 < alpha < 2/lambda_max`; the unit-Hessian factor `abs(1-alpha)` is not monotonic across the configured sweep. Accuracy applies to converged rows. Scalar objective-evaluation stability is distinct from gradient-descent convergence.
 
-This is a correction to current manuscript source. It does not replace any historical PDF, DOI deposit or release asset. The declared project suite passed 301 tests with 93.89% coverage using its own coverage configuration. Generated manuscript outputs are checked separately; broader experimental and publication acceptance remains subject to the repository's declared contracts.
+## Reader verification on November 28, 2026
 
-The counts above are fresh local checks on the current source, using `uv run pytest projects/templates/template_code_project/tests --cov=template_code_project --cov-config=projects/templates/template_code_project/pyproject.toml --cov-fail-under=90 -q`. Retained `output/reports/test_results.json` files describe their earlier pipeline epoch and are not substituted for these local checks. Historical tracked output bytes remain unchanged; fresh renders are review artifacts, not a new release.
+Use the [standalone quick start](quickstart.md) for the locked test suite and
+pinned Template rendering commands. The reviewed merge at `18a65e55` passed
+its project tests and all nine Stage 04 checks for PDF, HTML, slides, DOCX,
+and EPUB. Page 23 of the 24-page PDF contains the References heading and all
+eight bibliography entries. A focused text-bound check found the rendered
+infrastructure paths within the page edge. [Reader verification](https://github.com/docxology/template_code_project/pull/19)
 
-Fresh local HTML renders embed source-font bodies in each document and exceeded the existing aggregate tracked-output budget. They remain private review artifacts; this correction does not weaken the budget or publish a new output set. A bounded HTML projection requires a separate reviewed rendering change before tracked-output publication.
+The 14-file `output/web/` inventory contains 11 HTML pages and their shared
+source-font asset at `output/web/assets/source-web-fonts.js`. The inventory
+totals 2,494,920 bytes. The complete native inventory contains 67 files and
+totals 13,315,699 bytes.
 
-A sampled local PDF page showed an overflowing infrastructure path. Automated render success is not full format acceptance; inspect and correct layout in a separate candidate before publishing new output artifacts.
+Replacing the bundled Code Project output subtree on Template candidate
+`bd887754` with that native inventory projects 229,193,951 tracked output bytes.
+That leaves 5,687,073 bytes under Template’s repository-wide 224 MiB ceiling.
+The coordinated publication check measures the exact final set across all
+bundled examples. [Template output guard](https://github.com/docxology/template/blob/bd887754553cc79a127c3ac05c15b2b42b8a7c60/infrastructure/project/git_guards.py#L361-L400)
+
+The v3.0.0 release handoff includes the final DOI-bound metadata, reviewed
+reader assets, and the verification for their exact source revision.

@@ -223,7 +223,7 @@ See [AGENTS.md](AGENTS.md) for technical documentation.
 - Forward backlog: [`TODO.md`](docs/TODO.md).
 - Copy-and-customize config: [`docs/manuscript/config.yaml.example`](docs/manuscript/config.yaml.example).
 - Validate the project from the standalone checkout root with `uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90`.
-- Check repository drift from the parent Template checkout root with `uv run python scripts/audit/check_template_drift.py --strict`.
+- Check drift for the bundled exemplar from the Template checkout root with `uv run python scripts/audit/check_template_drift.py --project templates/template_code_project --strict`.
 
 
 ## Optional hardening

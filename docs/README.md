@@ -11,7 +11,7 @@ and maintenance.
 
 ## Purpose
 
-The `docs/` directory contains the behavioral and architectural rules that govern modifications to the `template_code_project` exemplar. Every document here is a hard constraint — not a suggestion. The authoritative file index (including this `README.md` and `AGENTS.md`) lives in [`AGENTS.md`](AGENTS.md).
+The `docs/` directory groups setup, project rules, manuscript instructions, and publication evidence. The [agent index](AGENTS.md) records the rules for this checkout.
 
 ## Contents
 
@@ -25,6 +25,7 @@ The `docs/` directory contains the behavioral and architectural rules that gover
 | [`syntax_guide.md`](syntax_guide.md) | Markdown links, LaTeX refs, all `{{VARIABLE}}` tokens, figure label registry | Content authors |
 | [`output_conventions.md`](output_conventions.md) | Output directory layout, what's disposable, regeneration rules | Developers |
 | [`output_inventory.md`](output_inventory.md) | Full pipeline artifact inventory (generator + stage) | Developers |
+| [`publication_consistency_review.md`](publication_consistency_review.md) | Verified reader outputs, layout checks, and the tracked output budget | Authors, maintainers |
 | [`forking_guide.md`](forking_guide.md) | Fork workflow and drift-check guidance | Developers, agents |
 | [`troubleshooting.md`](troubleshooting.md) | Diagnosed failures incl. `mmdc`/Chrome and "PASSED but 0 tests", with fix commands | Developers |
 | [`quickstart.md`](quickstart.md) | Minimal run commands to first deliverable | New users |
@@ -50,44 +51,20 @@ The `docs/` directory contains the behavioral and architectural rules that gover
 
 ## Using this exemplar as a reference for a new project
 
-`template_code_project` is a **canonical, always-present reference** (see the
-root `CLAUDE.md`/`AGENTS.md`). Other projects and docs are told to default
-their path/layout examples here. Use it two ways:
-
-**1. As a pattern reference (don't copy — read).** When building any
-project, mirror these invariants — they are what the repo's gates enforce:
+Use this standalone checkout as a reference for tested research code,
+project-local evidence, and the `docs/manuscript/` layout.
 
 | Invariant | Where it's taught | How it's enforced |
 |---|---|---|
 | Thin-orchestrator: `scripts/` only I/O + orchestration, logic in `src/`/`infrastructure/` | [`architecture.md`](architecture.md), [`style_guide.md`](style_guide.md) | code review + `src/` infra-import grep |
-| Zero mocks: real data, `tmp_path`, `pytest-httpserver` | [`testing_philosophy.md`](testing_philosophy.md) | `scripts/audit/verify_no_mocks.py` |
+| Zero mocks: real data, `tmp_path`, `pytest-httpserver` | [`testing_philosophy.md`](testing_philosophy.md) | The test-source check below |
 | ≥90% project coverage on `src/` | [`testing_philosophy.md`](testing_philosophy.md) | `--cov-fail-under=90` (canonical command below) |
 | `docs/manuscript/config.yaml` is the single source of run policy | [`rendering_pipeline.md`](rendering_pipeline.md) | rendering infra |
 | Deterministic outputs (fixed seeds); everything in `output/` regeneratable | [`output_conventions.md`](output_conventions.md) | reproducibility checks |
 
-**2. As a fork seed for a new project.** Run these commands from the root
-of the [pinned Template checkout](https://github.com/docxology/template/tree/87704feae0a4490ef7dad9c931d268e8c30273c2).
-Edit the generated files under `projects/working/$NEW` and run the
-validation commands from the same Template root.
-
-```bash
-NEW=my_project
-uv run python scripts/audit/copy_exemplar.py \
-  --source templates/template_code_project \
-  --dest "projects/working/$NEW" \
-  --new-name "$NEW"
-# 1. Rewrite src/ with your domain logic (keep the pure-function, infra-free shape)
-# 2. Replace tests/ — real-data tests, no mocks, drive src/ coverage ≥90%
-# 3. Edit docs/manuscript/config.yaml (title, authors, thresholds) — the only policy knob
-# 4. Replace docs/manuscript/*.md with your narrative; keep {{TOKEN}} + figure-label conventions
-# 5. Point scripts/ at your src/ functions (thin orchestrators only)
-uv run pytest "projects/working/$NEW/tests/" --cov="projects/working/$NEW/src" --cov-fail-under=90
-uv run python scripts/runner/execute_pipeline.py --project "working/$NEW" --mode core
-```
-
-Then the project is discovered automatically (`discover_projects()`); the
-repo-level guide [`docs/guides/new-project-setup.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/new-project-setup.md)
-covers the full workflow.
+Follow the [standalone guide](standalone.md) when adapting this checkout.
+Template documents the bundled-project workflow in its
+[new project guide](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/new-project-setup.md).
 
 **Prerequisites to know before referencing the render path:** combined-PDF
 rendering of any ```mermaid``` block needs `chrome-headless-shell`
@@ -111,12 +88,14 @@ Run these commands from the standalone checkout root after the [quick start](qui
 # Tests pass + coverage ≥90%
 uv run --locked --extra dev pytest tests/ --cov --cov-config=pyproject.toml --cov-fail-under=90
 
-# No mocks in tests/
-grep -r "unittest.mock\|MagicMock\|@patch" tests/ || echo "Clean"
+# Scan test modules for mocking utilities.
+grep -rEn --include='*.py' 'unittest\.mock|MagicMock|@patch|create_autospec' tests/
 
-# src/ has no infrastructure imports
-grep -r "from infrastructure\|import infrastructure" src/ || echo "Clean"
+# Check the pure optimizer and invariant modules for direct SDK imports.
+grep -nE '^(from|import) infrastructure' src/template_code_project/core/{optimizer,invariants}.py
 ```
+
+For each grep check, status 1 means no matches and status 2 means a read error.
 
 ## See Also
 
