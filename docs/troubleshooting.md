@@ -1,6 +1,8 @@
 # Troubleshooting
 
-Symptom-driven recipes for the most common breakage modes when running this project.
+Use the [quick start](quickstart.md#render-and-validate) to prepare the pinned Template checkout
+and register the standalone project before trying these fixes. In the commands below,
+`$render_project` points to the registered checkout of the committed source you are troubleshooting.
 
 ## Literal `{{TOKEN_NAME}}` appears in the rendered PDF
 
@@ -10,18 +12,15 @@ analysis stage, or the token is not defined in `src/template_code_project/core/m
 
 **Fix.**
 
-1. Run the variable-hydration stage:
+1. Run hydration in the registered checkout.
    ```bash
-   uv run python scripts/z_generate_manuscript_variables.py
+   (cd "$render_project" && "$template_root/.venv/bin/python" scripts/z_generate_manuscript_variables.py)
    ```
-2. Inspect the resolved values:
+2. Inspect the resolved values.
    ```bash
-   cat output/data/manuscript_variables.json | jq .
+   jq . "$render_project/output/data/manuscript_variables.json"
    ```
-3. Re-render:
-   ```bash
-   uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
-   ```
+3. [Render and validate](quickstart.md#render-and-validate) with the pinned Template checkout.
 4. If the token is still literal, add it to `generate_variables()` in
    `src/template_code_project/core/manuscript_variables.py`.
 
@@ -46,21 +45,23 @@ analysis stage, or the token is not defined in `src/template_code_project/core/m
 
 ## Edited `docs/manuscript/config.yaml` but the figures or PDF didn't change
 
-**Cause.** Stages 4-5 (analysis → render) were skipped or only the render
-stage ran (it does not re-execute `optimization_analysis.py`).
+**Cause.** Stage 03 reads the registered source and existing analysis results.
+A change to the experiment config requires updated analysis.
 
-**Fix.** Run the analysis stage first, then variables, then render:
-
-```bash
-uv run python scripts/optimization_analysis.py
-uv run python scripts/z_generate_manuscript_variables.py
-uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project
-```
-
-Or just re-run the full pipeline:
+**Fix.** Register the updated committed source using the [quick start](quickstart.md#render-and-validate).
+Generate the evidence in that project, then render and validate it from the pinned Template checkout.
 
 ```bash
-uv run python scripts/runner/execute_pipeline.py --project templates/template_code_project --mode core
+(
+  cd "$render_project" &&
+  "$template_root/.venv/bin/python" scripts/optimization_analysis.py &&
+  "$template_root/.venv/bin/python" scripts/z_generate_manuscript_variables.py
+)
+(
+  cd "$template_root" &&
+  uv run --no-sync python scripts/pipeline/stage_03_render.py --project working/template_code_project &&
+  uv run --no-sync python scripts/pipeline/stage_04_validate.py --project working/template_code_project
+)
 ```
 
 ## `Figure ???` in the rendered PDF
@@ -74,7 +75,7 @@ before compilation.
 1. Verify `docs/manuscript/03_results.md` contains the image with the
    correct anchor:
    ```markdown
-   ![Caption.](../output/figures/convergence_plot.png){#fig:convergence}
+   ![Caption.](../../output/figures/convergence_plot.png){#fig:convergence}
    ```
 2. Verify the prose reference uses the same label:
    ```markdown
@@ -114,13 +115,11 @@ before compilation.
 
 ## `uv` command not found
 
-**Fix.** Install `uv` via the canonical installer (the repo invariant — see root `CLAUDE.md` — is `uv`-only; never bootstrap `uv` through `pip`):
+**Fix.** Follow the [checksum-verified uv installation instructions](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/operational/build/dependency-management.md#installing-uv) for macOS or Linux.
+
+On macOS, you can also use Homebrew.
 
 ```bash
-# macOS / Linux
-Follow the [checksum-verified uv installation instructions](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/operational/build/dependency-management.md#installing-uv).
-
-# Homebrew (macOS)
 brew install uv
 ```
 
@@ -203,7 +202,7 @@ asymmetry is the tell.
 npx --yes puppeteer browsers install chrome-headless-shell@131.0.6778.204
 # or the line mmdc/puppeteer resolves by default:
 npx --yes puppeteer browsers install chrome-headless-shell
-uv run python scripts/pipeline/stage_03_render.py --project templates/template_code_project   # re-verify
+(cd "$template_root" && uv run --no-sync python scripts/pipeline/stage_03_render.py --project working/template_code_project)
 ```
 
 Environment provisioning, not a manuscript defect — CI provisions it; a
