@@ -52,7 +52,7 @@ grep -r "{{" output/manuscript/ 2>/dev/null \
   || echo "All tokens resolved"
 ```
 
-See [`../docs/syntax_guide.md`](../syntax_guide.md) for an illustrative token reference table — it is a subset that may lag behind the code, per that file's own disclaimer. The authoritative source of truth is the return value of `src/template_code_project/core/manuscript_variables.py::generate_variables()`; the live cross-reference test `tests/core/test_manuscript_variables.py::test_all_manuscript_tokens_are_generated` is what actually gates completeness.
+See the [syntax guide](../syntax_guide.md) for an illustrative token reference table — it is a subset that may lag behind the code, per that file's own disclaimer. The authoritative source of truth is the return value of `src/template_code_project/core/manuscript_variables.py::generate_variables()`; the live cross-reference test `tests/core/test_manuscript_variables.py::test_all_manuscript_tokens_are_generated` is what actually gates completeness.
 
 ## Figure Protocol
 
@@ -124,6 +124,6 @@ Stage 05 copies final deliverables to `output/<project-selector>/` in the Templa
 - [`SYNTAX.md`](SYNTAX.md) — Pandoc syntax reference for this manuscript
 - [`../../../docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/manuscript-semantics.md) — Repository-wide canonical manuscript semantics shared by the permanent exemplars
 - [`../docs/rendering_pipeline.md`](../rendering_pipeline.md) — Manuscript → PDF flow (4 phases)
-- [`../docs/syntax_guide.md`](../syntax_guide.md) — Complete `{{VARIABLE}}` token reference
-- [`../src/template_code_project/core/manuscript_variables.py`](../../src/template_code_project/core/manuscript_variables.py) — Variable computation logic (`generate_variables()`)
+- [Syntax guide](../syntax_guide.md) — `{{VARIABLE}}` examples and manuscript syntax
+- [`src/template_code_project/core/manuscript_variables.py`](../../src/template_code_project/core/manuscript_variables.py) — Variable computation logic (`generate_variables()`)
 - [`../scripts/z_generate_manuscript_variables.py`](../../scripts/z_generate_manuscript_variables.py) — Thin orchestrator that runs the above and writes output files
