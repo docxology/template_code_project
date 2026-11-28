@@ -8,13 +8,13 @@ It demonstrates the complete research pipeline from algorithm implementation thr
 
 This project is explicitly designed to showcase the repository's three foundational pillars:
 
-1. **`infrastructure/` Layer**: The code delegates tracking, performance benchmarking, stability validation, and PDF rendering to the shared infrastructure packages at the repository root. Current package counts live in [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md).
+1. **`infrastructure/` Layer**: The optimizer delegates tracking and scientific checks to shared Template infrastructure. The pinned Template checkout runs the render and validation stages. Follow the [quick start](../quickstart.md). Current package counts live in [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md).
 2. **`tests/` Integrity**: A zero-mock suite ([`tests/`](../../tests/)) with **≥90%** coverage on `src/`. Live test count and measured coverage: [`docs/_generated/COUNTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/_generated/COUNTS.md).
-3. **`docs/` Orchestration**: Project documentation under `projects/templates/template_code_project/docs/` records the operational patterns and is checked by the repository documentation lint gates.
+3. **`docs/` Orchestration**: The [standalone documentation](../README.md) describes setup, rendering, and output locations.
 
 ## Manuscript Structure
 
-The `manuscript/` directory contains the raw markdown files that the renderer (`infrastructure/rendering/pdf_renderer.py`) transforms into the final academic PDF. These files are designed as a meta-narrative to demonstrate exactly how the repository executes:
+The numbered Markdown sections in `docs/manuscript/` describe the optimizer and its experiments. Template hydrates the analysis tokens and renders the configured editions.
 
 - `00_abstract.md`: Abstract; build variables and CSV-backed prose via `scripts/z_generate_manuscript_variables.py`.
 - `01_introduction.md`: Introduction of the infrastructure pillars bridging to CI/CD files.
@@ -32,7 +32,7 @@ graph TD
     classDef project fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
     classDef docs fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
 
-    subgraph "Project Space (`projects/templates/template_code_project/`)"
+    subgraph "Standalone project"
         Script["scripts/optimization_analysis.py"]:::project
         Manuscript["docs/manuscript/*.md"]:::project
     end
@@ -56,7 +56,7 @@ graph TD
     Reporting -->|Formats| Manuscript
     Manuscript -->|Compiled with| Config
     Config -->|Sent to| Rendering
-    Rendering -->|Produces| PDF["output/templates/template_code_project/pdf/template_code_project_combined.pdf"]:::project
+    Rendering -->|Produces| PDF["output/pdf/template_code_project_combined.pdf"]:::project
 ```
 
 ## Render and validate
@@ -84,5 +84,5 @@ If you are an AI agent operating in this repository, you **MUST** read [`AGENTS.
 ## See also
 
 - [`SYNTAX.md`](SYNTAX.md) — Pandoc citation / cross-reference conventions for this manuscript.
-- [`../../../docs/guides/manuscript-semantics.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/manuscript-semantics.md) — Repository-wide manuscript semantics.
-- [`../../../AGENTS.md`](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/AGENTS.md#permanent-canonical-exemplars) — public exemplar roster.
+- [Manuscript semantics](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/docs/guides/manuscript-semantics.md) — Repository-wide manuscript semantics.
+- [Public exemplar roster](https://github.com/docxology/template/blob/87704feae0a4490ef7dad9c931d268e8c30273c2/AGENTS.md#permanent-canonical-exemplars) — public exemplar roster.
