@@ -93,14 +93,18 @@ Follow these steps in order whenever you change behavior and need to update the 
    ```
 5. **Verify all tokens resolved**:
    ```bash
-   grep -r "{{" output/manuscript/ || echo "All resolved"
+   grep -nF '{{' output/manuscript/*.md
    ```
+   Exit status 1 means no matches. Exit status 2 indicates a read error, such
+   as missing hydrated output.
 6. **Render PDF** from the pinned Template checkout root using the
    [standalone rendering route](../rendering_pipeline.md#pdf-render).
    ```bash
    uv run --no-sync python scripts/pipeline/stage_03_render.py --project working/template_code_project
    ```
-7. **Verify figures and table appear** in the rendered PDF; check `output/tex/*.log` for LaTeX errors.
+7. **Verify figures and the table appear** in the rendered PDF. Check
+   `output/pdf/_combined_manuscript.log` in the registered working checkout
+   for LaTeX errors.
 
 > **Mermaid prerequisite.** The project convention is that every diagram is
 > Mermaid (`docs/AGENTS.md`). If a manuscript section embeds a ```mermaid```
